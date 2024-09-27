@@ -1,0 +1,96 @@
+﻿<!-- Pages/TextComparer.razor -->
+@page "/text-comparer"
+@using ChatGPT_Splitter_Blazor_New.TextComparer.Components
+@using ChatGPT_Splitter_Blazor_New.TextComparer.Services.Interfaces
+@inherits TextComparer
+@inject IControllerService ControllerService
+@inject IStorageService StorageService
+
+<PageTitle>Confronto Testi</PageTitle>
+
+<h3>Confronto Testi</h3>
+
+<!-- Componente per gestire le impostazioni del confronto -->
+<Settings />
+
+<!-- Componente per caricare i file -->
+<FileUploader />
+
+<!-- Mostra il loader durante il caricamento -->
+<Loader IsLoading="isLoading" />
+
+<!-- Mostra un messaggio di alert se presente -->
+@if (!string.IsNullOrEmpty(alertMessage))
+{
+    <AlertMessage Message="alertMessage" AlertType="alertType" />
+}
+
+<!-- Input dei testi da confrontare -->
+<div class="mt-4">
+    <div class="mb-3">
+        <label for="MyInputText1" class="form-label">Testo di Input 1:</label>
+        <textarea id="MyInputText1" class="form-control" @bind="MyInputText1" rows="5" placeholder="Inserisci il primo testo"></textarea>
+    </div>
+    <div class="mb-3">
+        <label for="MyInputText2" class="form-label">Testo di Input 2:</label>
+        <textarea id="MyInputText2" class="form-control" @bind="MyInputText2" rows="5" placeholder="Inserisci il secondo testo"></textarea>
+    </div>
+    <button class="btn btn-primary" @onclick="CompareTexts" disabled="@isLoading">Confronta</button>
+</div>
+
+<!-- Mostra i risultati del confronto -->
+@if (comparisonResults != null)
+{
+    <ComparisonResult Results="comparisonResults" />
+}
+
+@code {
+    private string MyInputText1 { get; set; }
+    private string MyInputText2 { get; set; }
+
+    private bool isLoading;
+    private string alertMessage;
+    private string alertType;
+    private List<ComparisonResult.ComparisonResultItem> comparisonResults;
+
+    // Metodo per confrontare i testi
+    private async Task CompareTexts()
+    {
+        // Controllo preliminare: i testi devono essere non vuoti
+        if (string.IsNullOrWhiteSpace(MyInputText1) || string.IsNullOrWhiteSpace(MyInputText2))
+        {
+            alertMessage = "Entrambi i testi devono essere compilati.";
+            alertType = "warning";
+            return;
+        }
+
+        // Avvia il caricamento
+        isLoading = true;
+        alertMessage = string.Empty;
+        comparisonResults = null;
+        StateHasChanged();
+
+        try
+        {
+            // Esegue il confronto tramite il servizio
+            var result = await ControllerService.CompareTextsAsync(MyInputText1, MyInputText2);
+            comparisonResults = new List<ComparisonResult.ComparisonResultItem>
+            {
+                new ComparisonResult.ComparisonResultItem { Index = 1, Description = result }
+            };
+            alertMessage = "Confronto completato.";
+            alertType = "info";
+        }
+        catch (Exception ex)
+        {
+            alertMessage = $"Errore durante il confronto: {ex.Message}";
+            alertType = "danger";
+        }
+        finally
+        {
+            // Ferma il caricamento
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+}

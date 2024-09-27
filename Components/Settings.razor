@@ -1,0 +1,87 @@
+﻿@using ChatGPT_Splitter_Blazor_New.TextComparer.Services.Interfaces
+<!-- Components/Settings.razor -->
+@inject IStorageService StorageService
+
+<h4>Impostazioni</h4>
+
+<div class="form-check">
+    <InputCheckbox class="form-check-input" @bind-Value="IgnoreFootnotes" />
+    <label class="form-check-label">Ignora Note a Piè di Pagina</label>
+</div>
+<div class="form-check">
+    <InputCheckbox class="form-check-input" @bind-Value="IgnoreLetterCase" />
+    <label class="form-check-label">Ignora Maiuscole/Minuscole</label>
+</div>
+<div class="form-check">
+    <InputCheckbox class="form-check-input" @bind-Value="IgnoreNumbers" />
+    <label class="form-check-label">Ignora Numeri</label>
+</div>
+<div class="form-check">
+    <InputCheckbox class="form-check-input" @bind-Value="IgnorePunctuation" />
+    <label class="form-check-label">Ignora Punteggiatura</label>
+</div>
+<div class="form-check">
+    <InputCheckbox class="form-check-input" @bind-Value="ReplaceUmlaut" />
+    <label class="form-check-label">Sostituisci Umlaut</label>
+</div>
+
+<button class="btn btn-primary mt-3" @onclick="SaveSettings">Salva Impostazioni</button>
+
+<Loader IsLoading="isLoading" />
+<AlertMessage Message="alertMessage" AlertType="alertType" />
+
+@code {
+    private bool IgnoreFootnotes { get; set; }
+    private bool IgnoreLetterCase { get; set; }
+    private bool IgnoreNumbers { get; set; }
+    private bool IgnorePunctuation { get; set; }
+    private bool ReplaceUmlaut { get; set; }
+
+    private bool isLoading = false;
+    private string alertMessage;
+    private string alertType;
+
+    protected override async Task OnInitializedAsync()
+    {
+        IgnoreFootnotes = await StorageService.GetItemAsync<bool>("ignoreFootnotes");
+        IgnoreLetterCase = await StorageService.GetItemAsync<bool>("ignoreLetterCase");
+        IgnoreNumbers = await StorageService.GetItemAsync<bool>("ignoreNumbers");
+        IgnorePunctuation = await StorageService.GetItemAsync<bool>("ignorePunctuation");
+        ReplaceUmlaut = await StorageService.GetItemAsync<bool>("replaceUmlaut");
+    }
+
+    private async Task SaveSettings()
+    {
+        isLoading = true;
+        alertMessage = string.Empty;
+        stateHasChanged();
+
+        try
+        {
+            await StorageService.SetItemAsync("ignoreFootnotes", IgnoreFootnotes);
+            await StorageService.SetItemAsync("ignoreLetterCase", IgnoreLetterCase);
+            await StorageService.SetItemAsync("ignoreNumbers", IgnoreNumbers);
+            await StorageService.SetItemAsync("ignorePunctuation", IgnorePunctuation);
+            await StorageService.SetItemAsync("replaceUmlaut", ReplaceUmlaut);
+
+            alertMessage = "Impostazioni salvate con successo!";
+            alertType = "info";
+        }
+        catch (Exception ex)
+        {
+            alertMessage = $"Errore nel salvataggio delle impostazioni: {ex.Message}";
+            alertType = "danger";
+        }
+        finally
+        {
+            isLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private void stateHasChanged()
+    {
+        // throw new NotImplementedException();
+    }
+
+}

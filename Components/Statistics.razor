@@ -1,0 +1,41 @@
+﻿@using ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.TextProcessing
+<div id="statistics">
+    <table class="table table-condensed table-bordered">
+        <thead>
+        <tr>
+            <th class="col-xs-2"></th>
+            <th class="col-xs-5">@Texts[0].FileName</th>
+            <th class="col-xs-5">@Texts[1].FileName</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <th>Type</th>
+            <td>@Texts[0].InputMode</td>
+            <td>@Texts[1].InputMode</td>
+        </tr>
+        <tr>
+            <th>Characters</th>
+            <td>@Texts[0].NrOfCharacters</td>
+            <td>@Texts[1].NrOfCharacters</td>
+        </tr>
+        <tr>
+            <th>Words</th>
+            <td>@Texts[0].NrOfWords</td>
+            <td>@Texts[1].NrOfWords</td>
+        </tr>
+        <tr>
+            <th>Unique matches</th>
+            <td colspan="2">@UniqueMatches</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter]
+    public List<MyInputText> Texts { get; set; }
+
+    [Parameter]
+    public int UniqueMatches { get; set; }
+}

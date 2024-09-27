@@ -1,0 +1,35 @@
+﻿@if (Results != null && Results.Any())
+{
+    <h4>Risultati del Confronto</h4>
+    @foreach (var result in Results)
+    {
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Risultato @result.Index</h5>
+                <p class="card-text">@result.Description</p>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <p>Nessun risultato da mostrare.</p>
+}
+
+@code {
+    [Parameter]
+    public List<ComparisonResultItem> Results { get; set; }
+
+    public class ComparisonResultItem
+    {
+        public string FileName { get; set; }
+        public string InputMode { get; set; }
+        public int NrOfCharacters { get; set; }
+        public int NrOfWords { get; set; }
+
+        public int Index { get; set; }
+        public string Description { get; set; }
+    }
+
+}
+

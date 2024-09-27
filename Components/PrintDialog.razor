@@ -1,0 +1,53 @@
+﻿@using ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.TextProcessing
+@if (IsVisible)
+{
+    <div class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" @onclick="OnClose">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title">Print output</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-xs-6">
+                            <div class="form-group form-group-sm">
+                                <label for="input-comment-1">1: Comment for @Texts[0].InputMode</label>
+                                <textarea id="input-comment-1" class="form-control" rows="5" @bind="Comment1" placeholder="Type a comment"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-xs-6">
+                            <div class="form-group form-group-sm">
+                                <label for="input-comment-2">2: Comment for @Texts[1].InputMode</label>
+                                <textarea id="input-comment-2" class="form-control" rows="5" @bind="Comment2" placeholder="Type a comment"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default btn-sm" @onclick="OnClose">Cancel</button>
+                    <button id="modal-print-btn" type="button" class="btn btn-primary btn-sm" @onclick="OnPrint">Print</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public bool IsVisible { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    [Parameter]
+    public EventCallback OnPrint { get; set; }
+
+    [Parameter]
+    public List<MyInputText> Texts { get; set; }
+
+    public string Comment1 { get; set; }
+    public string Comment2 { get; set; }
+}
