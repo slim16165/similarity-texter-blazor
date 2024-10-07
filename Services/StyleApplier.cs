@@ -66,14 +66,24 @@ public class StyleApplier
 
     private static void ExtendOverlapStyles(MatchSegment lastUniqueMatch, MatchSegment currentMatch)
     {
+        if (lastUniqueMatch.Unit != currentMatch.Unit)
+        {
+            throw new InvalidOperationException("Le unità di posizione di lastUniqueMatch e currentMatch non sono coerenti.");
+        }
+
+        // Verifica se la classe di stile già contiene "overlapping"
         var styleClass = lastUniqueMatch.StyleClass.EndsWith(" overlapping")
             ? lastUniqueMatch.StyleClass
-            : lastUniqueMatch.StyleClass + " overlapping";
+            : $"{lastUniqueMatch.StyleClass} overlapping";
 
+        // Applica la nuova classe di stile a entrambi i MatchSegment
         lastUniqueMatch.SetStyleClass(styleClass);
         currentMatch.SetStyleClass(styleClass);
-        currentMatch.MatchLength = currentMatch.TokenBeginPosition - lastUniqueMatch.TokenBeginPosition;
+
+        // Calcola il nuovo MatchLength basato sulle posizioni begin
+        currentMatch.MatchLength = currentMatch.BeginPosition - lastUniqueMatch.BeginPosition;
     }
+
 
     private static List<List<MatchSegment>> SortMatches(List<List<MatchSegment>> matches, int index)
     {

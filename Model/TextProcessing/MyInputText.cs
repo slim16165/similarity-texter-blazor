@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 
-namespace ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.TextProcessing;
+namespace ChatGPT_Splitter_Blazor_New.TextComparer.Model.TextProcessing;
 public class MyInputText
 {
     public string TabPaneId { get; private set; }

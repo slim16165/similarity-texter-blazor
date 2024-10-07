@@ -1,7 +1,7 @@
 ﻿using ChatGPT_Splitter_Blazor_New.TextComparer.Model.Comparison;
 using Microsoft.AspNetCore.Components;
 
-namespace ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model;
+namespace ChatGPT_Splitter_Blazor_New.TextComparer.Model;
 
 public class TargetMatch
 {

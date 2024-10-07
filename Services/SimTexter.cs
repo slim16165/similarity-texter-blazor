@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.TextProcessing;
+﻿using System.Text.RegularExpressions;
 using ChatGPT_Splitter_Blazor_New.TextComparer.Model.Comparison;
 using ChatGPT_Splitter_Blazor_New.TextComparer.Model.TextProcessing;
 using ChatGPT_Splitter_Blazor_New.TextComparer.Services.Interfaces;
@@ -59,6 +57,7 @@ public class SimTexter : ISimTexter
         foreach (var inputText in inputTexts)
         {
             var (text, textTokens) = ProcessSingleInputText(inputText, currentTokenPosition);
+
             texts.Add(text);
             tokens.AddRange(textTokens);
             currentTokenPosition += textTokens.Count;
@@ -72,25 +71,20 @@ public class SimTexter : ISimTexter
         string cleanText = _textProcessor.CleanText(inputText.Text);
         var tokens = _tokenizer.Tokenize(cleanText);
 
-        int tkBeginPos = startingTokenPosition;
-        int tkEndPos = tkBeginPos + tokens.Count;
-
         int wordCount = CountWords(cleanText);
 
         var text = new MyText(
-            inputText.Mode,
-            inputText.Text.Length,
-            wordCount,
-            inputText.FileName,
-            tkBeginPos)
-        {
-            TokenEndPos = tkEndPos
-        };
+            inputMode: inputText.Mode,
+            numberOfCharacters: inputText.Text.Length,
+            numberOfWords: wordCount,
+            fileName: inputText.FileName,
+            tokenBeginPosition: startingTokenPosition,
+            tokenEndPosition: startingTokenPosition + tokens.Count);
 
         return (text, tokens);
     }
 
-    private int CountWords(string text)
+    private static int CountWords(string text)
     {
         return Regex.Matches(text, @"\S+").Count;
     }

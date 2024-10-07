@@ -1,5 +1,4 @@
-﻿using ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.TextProcessing;
-using ChatGPT_Splitter_Blazor_New.TextComparer.Model.TextProcessing;
+﻿using ChatGPT_Splitter_Blazor_New.TextComparer.Model.TextProcessing;
 
 namespace ChatGPT_Splitter_Blazor_New.TextComparer.Services;
 
@@ -17,7 +16,7 @@ public class ForwardReferenceManager
         var mtsTags = new Dictionary<string, int>();
         var forwardReferences = new Dictionary<int, int>();
 
-        for (int i = text.TokenkBeginPos; (i + _config.MinMatchLength - 1) < text.TokenEndPos; i++)
+        for (int i = text.TokenBeginPos; (i + _config.MinMatchLength - 1) < text.TokenEndPos; i++)
         {
             var tag = GenerateTag(i, tokens);
 
