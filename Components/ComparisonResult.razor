@@ -1,12 +1,17 @@
-﻿@if (Results != null && Results.Any())
+﻿@using ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.Comparison
+@if (Results != null && Results.Any())
 {
     <h4>Risultati del Confronto</h4>
     @foreach (var result in Results)
     {
         <div class="card mb-3">
             <div class="card-body">
-                <h5 class="card-title">Risultato @result.Index</h5>
-                <p class="card-text">@result.Description</p>
+                <p class="card-text">
+                    <strong>Testo 1:</strong> @MyInputText1.Substring(result.SourceStart, result.SourceEnd - result.SourceStart)
+                </p>
+                <p class="card-text">
+                    <strong>Testo 2:</strong> @MyInputText2.Substring(result.TargetStart, result.TargetEnd - result.TargetStart)
+                </p>
             </div>
         </div>
     }
@@ -18,18 +23,12 @@ else
 
 @code {
     [Parameter]
-    public List<ComparisonResultItem> Results { get; set; }
+    public List<MatchSegment> Results { get; set; }
 
-    public class ComparisonResultItem
-    {
-        public string FileName { get; set; }
-        public string InputMode { get; set; }
-        public int NrOfCharacters { get; set; }
-        public int NrOfWords { get; set; }
+    [Parameter]
+    public string MyInputText1 { get; set; }
 
-        public int Index { get; set; }
-        public string Description { get; set; }
-    }
-
+    [Parameter]
+    public string MyInputText2 { get; set; }
 }
 

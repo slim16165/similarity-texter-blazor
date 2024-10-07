@@ -1,4 +1,6 @@
-﻿namespace ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Services;
+﻿using ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.Comparison;
+
+namespace ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Services;
 
 using System.Threading.Tasks;
 using Model.TextProcessing;
@@ -14,16 +16,17 @@ public class ControllerService : IControllerService
     {
         _storageService = storageService;
         _simTexter = simTexter;
+        Instance = this;
     }
 
     public static ControllerService Instance { get; set; }
 
     // Metodo per confrontare due testi utilizzando SimTexter
-    public async Task<string> CompareTextsAsync(string input1, string input2)
+    public async Task<List<MatchSegment>> CompareTextsAsync(string input1, string input2)
     {
         if (string.IsNullOrWhiteSpace(input1) || string.IsNullOrWhiteSpace(input2))
         {
-            return "Uno o entrambi i testi sono vuoti.";
+            throw new Exception("Uno o entrambi i testi sono vuoti.");
         }
 
         // Imposta SimTexter in base alle impostazioni recuperate dallo StorageService
@@ -45,18 +48,11 @@ public class ControllerService : IControllerService
             // Esegue il confronto utilizzando SimTexter
             var result = await _simTexter.CompareAsync(inputTexts);
 
-            if (result.Count > 0)
-            {
-                return "Sono state trovate somiglianze tra i testi.";
-            }
-            else
-            {
-                return "Non sono state trovate somiglianze.";
-            }
+            return result;
         }
         catch (Exception ex)
         {
-            return $"Errore durante il confronto: {ex.Message}";
+            throw new Exception($"Errore durante il confronto: {ex.Message}");
         }
     }
 }

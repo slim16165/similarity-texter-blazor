@@ -52,16 +52,26 @@ public class SimTexter
 
     private List<MatchSegment> _applyStyles(List<MatchSegment> matches)
     {
-        // Sorting and styling logic goes here.
-        return matches; // Return matches with applied styles.
+        // Ordina i match per posizione
+        var sortedMatches = matches.OrderBy(m => m.SourceStart).ToList();
+
+        // Applica identificatori unici per l'evidenziazione
+        int highlightId = 1;
+        foreach (var match in sortedMatches)
+        {
+            match.HighlightId = highlightId++;
+        }
+
+        return sortedMatches;
     }
 
     private void _readInput(List<MyInputText> MyInputTexts, List<int> forwardReferences)
     {
+        int textIndex = 0;
         foreach (var MyInputText in MyInputTexts)
         {
-            // Tokenize input text and store in Tokens list.
-            _tokenizeInput(MyInputText.Text);
+            _tokenizeInput(MyInputText.Text, textIndex);
+            textIndex++;
         }
     }
 
@@ -85,14 +95,60 @@ public class SimTexter
 
     private string _cleanWord(string word)
     {
-        // Apply cleaning rules based on settings.
-        return word.ToLower();
+        if (ReplaceUmlaut)
+        {
+            word = word.Replace("ä", "ae")
+                .Replace("ö", "oe")
+                .Replace("ü", "ue")
+                .Replace("ß", "ss");
+        }
+
+        if (IgnorePunctuation)
+        {
+            word = Regex.Replace(word, @"\p{P}", "");
+        }
+
+        if (IgnoreNumbers)
+        {
+            word = Regex.Replace(word, @"\d", "");
+        }
+
+        if (IgnoreLetterCase)
+        {
+            word = word.ToLower();
+        }
+
+        return word;
     }
 
     private List<MatchSegment> _getSimilarities(int srcTxtIdx, int trgTxtIdx, List<int> forwardReferences)
     {
         var similarities = new List<MatchSegment>();
-        // Logic to find similarities and matches between texts.
+
+        var sourceTokens = Tokens.Where(t => t.TextIndex == srcTxtIdx).ToList();
+        var targetTokens = Tokens.Where(t => t.TextIndex == trgTxtIdx).ToList();
+
+        // Algoritmo di confronto
+        for (int i = 0; i < sourceTokens.Count; i++)
+        {
+            for (int j = 0; j < targetTokens.Count; j++)
+            {
+                if (sourceTokens[i].CleanedWord == targetTokens[j].CleanedWord)
+                {
+                    // Crea un nuovo match
+                    var match = new MatchSegment
+                    {
+                        SourceStart = sourceTokens[i].StartIndex,
+                        SourceEnd = sourceTokens[i].EndIndex,
+                        TargetStart = targetTokens[j].StartIndex,
+                        TargetEnd = targetTokens[j].EndIndex,
+                        Length = 1 // Puoi aumentare la logica per lunghezze maggiori
+                    };
+                    similarities.Add(match);
+                }
+            }
+        }
+
         return similarities;
     }
 

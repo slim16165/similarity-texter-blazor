@@ -2,6 +2,7 @@
 @page "/text-comparer"
 @using ChatGPT_Splitter_Blazor_New.TextComparer.Components
 @using ChatGPT_Splitter_Blazor_New.TextComparer.Services.Interfaces
+@using ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.Comparison
 @inherits TextComparer
 @inject IControllerService ControllerService
 @inject IStorageService StorageService
@@ -51,7 +52,7 @@
     private bool isLoading;
     private string alertMessage;
     private string alertType;
-    private List<ComparisonResult.ComparisonResultItem> comparisonResults;
+    private List<MatchSegment> comparisonResults;
 
     // Metodo per confrontare i testi
     private async Task CompareTexts()
@@ -72,12 +73,7 @@
 
         try
         {
-            // Esegue il confronto tramite il servizio
-            var result = await ControllerService.CompareTextsAsync(MyInputText1, MyInputText2);
-            comparisonResults = new List<ComparisonResult.ComparisonResultItem>
-            {
-                new ComparisonResult.ComparisonResultItem { Index = 1, Description = result }
-            };
+            comparisonResults = await ControllerService.CompareTextsAsync(MyInputText1, MyInputText2);
             alertMessage = "Confronto completato.";
             alertType = "info";
         }
@@ -93,4 +89,10 @@
             StateHasChanged();
         }
     }
+
+    private void StateHasChanged()
+    {
+        throw new NotImplementedException();
+    }
+
 }

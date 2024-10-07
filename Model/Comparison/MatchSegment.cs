@@ -17,6 +17,11 @@ public class MatchSegment
         StyleClass = string.Empty;
     }
 
+    public MatchSegment()
+    {
+        throw new NotImplementedException();
+    }
+
     /// <summary>
     /// Crea il link associato al match.
     /// </summary>

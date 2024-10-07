@@ -32,4 +32,10 @@ public class Token
         TxtBeginPos = txtBeginPos;
         TxtEndPos = txtEndPos;
     }
+
+    public string OriginalWord { get; set; }
+    public string CleanedWord { get; set; }
+    public int StartIndex { get; set; }
+    public int EndIndex { get; set; }
+    public int TextIndex { get; set; }
 }
