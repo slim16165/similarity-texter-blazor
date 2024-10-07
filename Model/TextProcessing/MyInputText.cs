@@ -4,15 +4,15 @@ namespace ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.TextProcessing;
 public class MyInputText
 {
     public string TabPaneId { get; private set; }
-    public string Mode { get; private set; }
+    public string Mode { get; set; }
     public bool IsHTML { get; private set; }
     public string FileName { get; private set; }
-    public string Text { get; private set; }
+    public string Text { get; set; }
     public string InputMode { get; set; }
     public int NrOfCharacters { get; set; }
     public int NrOfWords { get; set; }
 
-    public MyInputText(string mode, IBrowserFile file = null, string text = null, string tabPaneId = null)
+    public MyInputText(string mode = "Text", IBrowserFile file = null, string text = null, string tabPaneId = null)
     {
         TabPaneId = tabPaneId;
         Mode = mode;

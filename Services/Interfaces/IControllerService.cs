@@ -4,5 +4,5 @@ namespace ChatGPT_Splitter_Blazor_New.TextComparer.Services.Interfaces;
 
 public interface IControllerService
 {
-    Task<List<MatchSegment>> CompareTextsAsync(string input1, string input2);
+    Task<List<List<MatchSegment>>> CompareTextsAsync(string input1, string input2);
 }

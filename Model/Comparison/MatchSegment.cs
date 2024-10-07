@@ -6,7 +6,7 @@ public class MatchSegment
 {
     public int TxtIdx { get; }
     public int TkBeginPos { get; }
-    public int MatchLength { get; }
+    public int MatchLength { get; set; }
     public string StyleClass { get; private set; }
 
     public MatchSegment(int txtIdx, int tkBeginPos, int matchLength)
@@ -15,11 +15,6 @@ public class MatchSegment
         TkBeginPos = tkBeginPos;
         MatchLength = matchLength;
         StyleClass = string.Empty;
-    }
-
-    public MatchSegment()
-    {
-        throw new NotImplementedException();
     }
 
     /// <summary>
@@ -68,15 +63,13 @@ public class MatchSegment
     /// Imposta la classe di stile del match segment.
     /// </summary>
     /// <param name="n">La classe di stile da applicare.</param>
-    public void SetStyleClass(object n)
+    public void SetStyleClass(string n)
     {
-        if (n is int)
-        {
-            StyleClass = $"hl-{(int)n % 10}";
-        }
-        else if (n is string)
-        {
-            StyleClass = n.ToString();
-        }
+        StyleClass = n;
+    }
+    
+    public void SetStyleClass(int n)
+    {
+        StyleClass = $"hl-{(int)n % 10}";
     }
 }

@@ -6,7 +6,7 @@ public class Text
     public string InputMode { get; private set; }
     public string FileName { get; private set; }
     public int TkBeginPos { get; private set; }
-    public int TkEndPos { get; private set; }
+    public int TkEndPos { get; set; }
     public int NrOfCharacters { get; private set; }
     public int NrOfWords { get; private set; }
 

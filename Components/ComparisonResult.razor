@@ -1,4 +1,6 @@
 ﻿@using ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.Comparison
+@using ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.TextProcessing
+
 @if (Results != null && Results.Any())
 {
     <h4>Risultati del Confronto</h4>
@@ -7,10 +9,8 @@
         <div class="card mb-3">
             <div class="card-body">
                 <p class="card-text">
-                    <strong>Testo 1:</strong> @MyInputText1.Substring(result.SourceStart, result.SourceEnd - result.SourceStart)
-                </p>
-                <p class="card-text">
-                    <strong>Testo 2:</strong> @MyInputText2.Substring(result.TargetStart, result.TargetEnd - result.TargetStart)
+                    <strong>Testo @(result.TxtIdx + 1):</strong>
+                    @GetMatchText(result, Tokens)
                 </p>
             </div>
         </div>
@@ -26,9 +26,30 @@ else
     public List<MatchSegment> Results { get; set; }
 
     [Parameter]
+    public List<Token> Tokens { get; set; }
+
+    private string GetMatchText(MatchSegment match, List<Token> tokens)
+    {
+        int startPos = match.GetTxtBeginPos(tokens);
+        int endPos = match.GetTxtEndPos(tokens);
+
+        // Assumiamo che il testo originale sia accessibile tramite una proprietà o metodo
+        string originalText = GetOriginalText(match.TxtIdx);
+
+        return originalText.Substring(startPos, endPos - startPos + 1);
+    }
+
+    private string GetOriginalText(int textIndex)
+    {
+        // Implementa questo metodo per restituire il testo originale basato sull'indice
+        // Potrebbe essere necessario passare i testi originali come parametri aggiuntivi
+        // o memorizzarli in una proprietà della classe
+        return textIndex == 0 ? MyInputText1 : MyInputText2;
+    }
+
+    [Parameter]
     public string MyInputText1 { get; set; }
 
     [Parameter]
     public string MyInputText2 { get; set; }
 }
-
