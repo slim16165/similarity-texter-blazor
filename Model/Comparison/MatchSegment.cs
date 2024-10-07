@@ -1,18 +1,19 @@
 ﻿using ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.TextProcessing;
+using ChatGPT_Splitter_Blazor_New.TextComparer.Model.TextProcessing;
 
-namespace ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.Comparison;
+namespace ChatGPT_Splitter_Blazor_New.TextComparer.Model.Comparison;
 
 public class MatchSegment
 {
-    public int TxtIdx { get; }
-    public int TkBeginPos { get; }
+    public int TextIndex { get; }
+    public int TokenBeginPosition { get; }
     public int MatchLength { get; set; }
     public string StyleClass { get; private set; }
 
-    public MatchSegment(int txtIdx, int tkBeginPos, int matchLength)
+    public MatchSegment(int textIndex, int tokenBeginPosition, int matchLength)
     {
-        TxtIdx = txtIdx;
-        TkBeginPos = tkBeginPos;
+        TextIndex = textIndex;
+        TokenBeginPosition = tokenBeginPosition;
         MatchLength = matchLength;
         StyleClass = string.Empty;
     }
@@ -25,8 +26,8 @@ public class MatchSegment
     /// <returns>Il nodo HTML come stringa con link.</returns>
     public string CreateLinkNode(string text, MatchSegment trgMatchSegment)
     {
-        var matchLinkId = $"{TxtIdx + 1}-{TkBeginPos}";
-        var href = $"#{trgMatchSegment.TxtIdx + 1}-{trgMatchSegment.TkBeginPos}";
+        var matchLinkId = $"{TextIndex + 1}-{TokenBeginPosition}";
+        var href = $"#{trgMatchSegment.TextIndex + 1}-{trgMatchSegment.TokenBeginPosition}";
         return $"<a id='{matchLinkId}' class='{StyleClass}' href='{href}'>{text}</a>";
     }
 
@@ -36,7 +37,7 @@ public class MatchSegment
     /// <returns>La posizione finale del token (non inclusivo).</returns>
     public int GetTkEndPosition()
     {
-        return TkBeginPos + MatchLength;
+        return TokenBeginPosition + MatchLength;
     }
 
     /// <summary>
@@ -46,7 +47,7 @@ public class MatchSegment
     /// <returns>Posizione iniziale del match nel testo.</returns>
     public int GetTxtBeginPos(List<Token> tokens)
     {
-        return tokens[TkBeginPos].TxtBeginPos;
+        return tokens[TokenBeginPosition].TextBeginPos;
     }
 
     /// <summary>
@@ -56,20 +57,20 @@ public class MatchSegment
     /// <returns>Posizione finale del match nel testo.</returns>
     public int GetTxtEndPos(List<Token> tokens)
     {
-        return tokens[TkBeginPos + MatchLength - 1].TxtEndPos;
+        return tokens[TokenBeginPosition + MatchLength - 1].TextEndPos;
     }
 
     /// <summary>
     /// Imposta la classe di stile del match segment.
     /// </summary>
     /// <param name="n">La classe di stile da applicare.</param>
-    public void SetStyleClass(string n)
+    public void SetStyleClass(string styleClass)
     {
-        StyleClass = n;
+        StyleClass = styleClass;
     }
-    
-    public void SetStyleClass(int n)
+
+    public void SetStyleClass(int styleNumber)
     {
-        StyleClass = $"hl-{(int)n % 10}";
+        SetStyleClass($"hl-{styleNumber % 10}");
     }
 }

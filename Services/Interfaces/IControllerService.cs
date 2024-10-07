@@ -1,4 +1,4 @@
-﻿using ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.Comparison;
+﻿using ChatGPT_Splitter_Blazor_New.TextComparer.Model.Comparison;
 
 namespace ChatGPT_Splitter_Blazor_New.TextComparer.Services.Interfaces;
 

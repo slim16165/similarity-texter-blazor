@@ -1,5 +1,6 @@
-﻿@using ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.Comparison
-@using ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.TextProcessing
+﻿@using ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.TextProcessing
+@using ChatGPT_Splitter_Blazor_New.TextComparer.Model.Comparison
+@using ChatGPT_Splitter_Blazor_New.TextComparer.Model.TextProcessing
 
 @if (Results != null && Results.Any())
 {
@@ -9,7 +10,7 @@
         <div class="card mb-3">
             <div class="card-body">
                 <p class="card-text">
-                    <strong>Testo @(result.TxtIdx + 1):</strong>
+                    <strong>Testo @(result.TextIndex + 1):</strong>
                     @GetMatchText(result, Tokens)
                 </p>
             </div>
@@ -34,7 +35,7 @@ else
         int endPos = match.GetTxtEndPos(tokens);
 
         // Assumiamo che il testo originale sia accessibile tramite una proprietà o metodo
-        string originalText = GetOriginalText(match.TxtIdx);
+        string originalText = GetOriginalText(match.TextIndex);
 
         return originalText.Substring(startPos, endPos - startPos + 1);
     }

@@ -1,4 +1,4 @@
-﻿namespace ChatGPT_Splitter_Blazor_New.Pages.TextComparer.Model.TextProcessing;
+﻿namespace ChatGPT_Splitter_Blazor_New.TextComparer.Model.TextProcessing;
 
 /// <summary>
 /// Rappresenta un token del testo, con posizione nel testo.
@@ -8,34 +8,28 @@ public class Token
     /// <summary>
     /// Il testo della parola dopo essere stato "pulito" secondo le opzioni di confronto.
     /// </summary>
-    public string Text { get; private set; }
+    public string Text { get; }
 
     /// <summary>
     /// L'indice del primo carattere della parola nell'input originale (inclusivo).
     /// </summary>
-    public int TxtBeginPos { get; private set; }
+    public int TextBeginPos { get; }
 
     /// <summary>
     /// L'indice dell'ultimo carattere della parola nell'input originale (non incluso).
     /// </summary>
-    public int TxtEndPos { get; private set; }
+    public int TextEndPos { get; }
 
     /// <summary>
     /// Costruttore della classe Token.
     /// </summary>
     /// <param name="text">Il testo della parola dopo essere stato pulito.</param>
-    /// <param name="txtBeginPos">L'indice del primo carattere della parola.</param>
-    /// <param name="txtEndPos">L'indice dell'ultimo carattere della parola (non incluso).</param>
-    public Token(string text = "", int txtBeginPos = 0, int txtEndPos = 0)
+    /// <param name="textBeginPos">L'indice del primo carattere della parola.</param>
+    /// <param name="textEndPos">L'indice dell'ultimo carattere della parola (non incluso).</param>
+    public Token(string text = "", int textBeginPos = 0, int textEndPos = 0)
     {
         Text = text;
-        TxtBeginPos = txtBeginPos;
-        TxtEndPos = txtEndPos;
+        TextBeginPos = textBeginPos;
+        TextEndPos = textEndPos;
     }
-
-    public string OriginalWord { get; set; }
-    public string CleanedWord { get; set; }
-    public int StartIndex { get; set; }
-    public int EndIndex { get; set; }
-    public int TextIndex { get; set; }
 }

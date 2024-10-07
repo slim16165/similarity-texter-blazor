@@ -11,41 +11,40 @@ public class TextInputReader
     /// </summary>
     /// <param name="text">L'input HTML da cui estrarre il testo.</param>
     /// <returns>Una task che rappresenta il testo estratto e pulito.</returns>
-    public async Task<string> ReadTextInput(string text)
+    public async Task<string> ReadTextInputAsync(string htmlInput)
     {
-        return await Task.Run(() =>
-        {
-            var cleanedText = string.Empty;
-
-            // Crea un nuovo elemento div per caricare l'HTML
-            var div = new XElement("div", XElement.Parse(text));
-
-            // Estrai il testo dai nodi HTML
-            var textNode = _ExtractTextFromNode(div);
-
-            // Se il testo non è vuoto o solo spazi bianchi
-            if (!string.IsNullOrEmpty(textNode) && Regex.IsMatch(textNode, @"\S"))
-            {
-                cleanedText = textNode;
-
-                // Rimuovi spazi multipli
-                cleanedText = Regex.Replace(cleanedText, @"\n[\t\v ]*", "\n");
-                // Rimuovi le nuove righe multiple
-                cleanedText = Regex.Replace(cleanedText, @"\n{3,}", "\n\n");
-
-                return cleanedText;
-            }
-
-            throw new Exception("HTML input has no valid text contents.");
-        });
+        var cleanedText = await Task.Run(() => CleanHtmlInput(htmlInput));
+        return cleanedText;
     }
+
+    private string CleanHtmlInput(string htmlInput)
+    {
+        var div = new XElement("div", XElement.Parse(htmlInput));
+        var extractedText = ExtractTextRecursively(div);
+
+        if (string.IsNullOrWhiteSpace(extractedText))
+        {
+            throw new Exception("HTML input has no valid text contents.");
+        }
+
+        extractedText = NormalizeWhitespace(extractedText);
+        return extractedText;
+    }
+
+    private static string NormalizeWhitespace(string text)
+    {
+        text = Regex.Replace(text, @"\n[\t\v ]*", "\n");
+        text = Regex.Replace(text, @"\n{3,}", "\n\n");
+        return text;
+    }
+
 
     /// <summary>
     /// Esplora ricorsivamente i nodi figli e restituisce il contenuto di testo dell'HTML come stringa.
     /// </summary>
     /// <param name="node">L'elemento HTML da cui estrarre il testo.</param>
     /// <returns>Il contenuto di testo estratto.</returns>
-    private string _ExtractTextFromNode(XElement node)
+    private static string ExtractTextRecursively(XElement node)
     {
         var str = string.Empty;
 
@@ -70,7 +69,7 @@ public class TextInputReader
                 }
                 else if (child is XElement childElement)
                 {
-                    var extractedContent = _ExtractTextFromNode(childElement);
+                    var extractedContent = ExtractTextRecursively(childElement);
 
                     // Aggiunge uno spazio tra nodi di testo non separati da spazi o newline
                     if (letterRegex.IsMatch(str.LastOrDefault().ToString()) && letterRegex.IsMatch(extractedContent.FirstOrDefault().ToString()))

@@ -34,13 +34,14 @@ public class MyInputText
     /// <summary>
     /// Resets the fields of MyInputText.
     /// </summary>
-    public void Reset()
+    public void ClearInput()
     {
         TabPaneId = null;
         Mode = null;
         FileName = null;
         Text = null;
     }
+
 
     /// <summary>
     /// Sets the fields for the file input.
@@ -50,10 +51,7 @@ public class MyInputText
     /// <param name="tabPaneId">The ID of the tab pane.</param>
     public void SetFileInput(IBrowserFile file, string text, string tabPaneId)
     {
-        TabPaneId = tabPaneId;
-        Mode = "File";
-        FileName = file.Name;
-        Text = text;
+        SetInput("File", file.Name, text, tabPaneId);
     }
 
     /// <summary>
@@ -63,9 +61,15 @@ public class MyInputText
     /// <param name="tabPaneId">The ID of the tab pane.</param>
     public void SetTextInput(string text, string tabPaneId)
     {
+        string fileName = IsHTML ? "HTML text input" : "Plain text input";
+        SetInput("Text", fileName, text, tabPaneId);
+    }
+
+    private void SetInput(string mode, string fileName, string text, string tabPaneId)
+    {
         TabPaneId = tabPaneId;
-        Mode = "Text";
-        FileName = IsHTML ? "HTML text input" : "Plain text input";
+        Mode = mode;
+        FileName = fileName;
         Text = text;
     }
 
