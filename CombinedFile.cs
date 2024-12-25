@@ -1,0 +1,1587 @@
+### Contenuto di Program.cs ###
+using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using SimilarityTextComparison.Blazor;
+
+var builder = WebAssemblyHostBuilder.CreateDefault(args);
+builder.RootComponents.Add<App>("#app");
+builder.RootComponents.Add<HeadOutlet>("head::after");
+
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+
+await builder.Build().RunAsync();
+
+
+### Contenuto di IControllerService.cs ###
+using SimilarityTextComparison.Core.Models.Comparison;
+
+namespace SimilarityTextComparison.Core.Interfaces;
+
+public interface IControllerService
+{
+    Task<List<List<MatchSegment>>> CompareTextsAsync(string input1, string input2);
+}
+
+
+### Contenuto di ISimTexter.cs ###
+using SimilarityTextComparison.Core.Models.Comparison;
+using SimilarityTextComparison.Core.Models.TextProcessing;
+
+namespace SimilarityTextComparison.Core.Interfaces;
+
+public interface ISimTexter
+{
+    Task<List<List<MatchSegment>>> CompareAsync(List<MyInputText> inputTexts);
+}
+
+
+### Contenuto di IStorageService.cs ###
+namespace SimilarityTextComparison.Core.Interfaces;
+
+public interface IStorageService
+{
+    Task<T> GetItemAsync<T>(string key);
+    Task SetItemAsync<T>(string key, T value);
+}
+
+
+### Contenuto di ITextComparer.cs ###
+using SimilarityTextComparison.Core.Models.Comparison;
+using SimilarityTextComparison.Core.Models.TextProcessing;
+
+namespace SimilarityTextComparison.Core.Interfaces;
+
+public interface ITextComparer
+{
+    Task<List<List<MatchSegment>>> CompareAsync(List<InputInfo> inputTexts);
+}
+
+
+### Contenuto di MatchSegment.cs ###
+using SimilarityTextComparison.Core.Models.Position;
+using SimilarityTextComparison.Core.Models.TextProcessing;
+
+namespace SimilarityTextComparison.Core.Models.Comparison;
+
+public class MatchSegment : IndexedPositionalEntity
+{
+    //public int TextIndex => base.TextIndex;
+    public int TokenBeginPosition => base.BeginPosition;
+    public int MatchLength
+    {
+        get => base.Length;
+        set => throw new NotImplementedException();
+    }
+
+    public string StyleClass { get; set; }
+
+    public MatchSegment(int textIndex, int tokenkBeginPos, int matchLength) : base(textIndex, tokenkBeginPos, tokenkBeginPos + matchLength)
+    {
+        StyleClass = string.Empty;
+    }
+
+    /// <summary>
+    /// Crea il link associato al match.
+    /// </summary>
+    /// <param name="text">Il contenuto del nodo.</param>
+    /// <param name="trgMatchSegment">Il match segment di destinazione.</param>
+    /// <returns>Il nodo HTML come stringa con link.</returns>
+    public string CreateLinkNode(string text, MatchSegment trgMatchSegment)
+    {
+        var matchLinkId = $"{TextIndex + 1}-{TokenBeginPosition}";
+        var href = $"#{trgMatchSegment.TextIndex + 1}-{trgMatchSegment.TokenBeginPosition}";
+        return $"<a id='{matchLinkId}' class='{StyleClass}' href='{href}'>{text}</a>";
+    }
+
+    /// <summary>
+    /// Restituisce la posizione finale del token del match.
+    /// </summary>
+    /// <returns>La posizione finale del token (non inclusivo).</returns>
+    public int GetTkEndPosition()
+    {
+        return TokenBeginPosition + MatchLength;
+    }
+
+    /// <summary>
+    /// Restituisce la posizione di inizio del testo del match.
+    /// </summary>
+    /// <param name="tokens">Lista di token con posizione del testo.</param>
+    /// <returns>Posizione iniziale del match nel testo.</returns>
+    public int GetTxtBeginPos(List<Token> tokens)
+    {
+        return tokens[TokenBeginPosition].TextBeginPos;
+    }
+
+    /// <summary>
+    /// Restituisce la posizione finale del testo del match.
+    /// </summary>
+    /// <param name="tokens">Lista di token con posizione del testo.</param>
+    /// <returns>Posizione finale del match nel testo.</returns>
+    public int GetTxtEndPos(List<Token> tokens)
+    {
+        return tokens[TokenBeginPosition + MatchLength - 1].TextEndPos;
+    }
+
+    /// <summary>
+    /// Imposta la classe di stile del match segment.
+    /// </summary>
+    /// <param name="n">La classe di stile da applicare.</param>
+    public void SetStyleClass(string styleClass)
+    {
+        StyleClass = styleClass;
+    }
+
+    public void SetStyleClass(int styleNumber)
+    {
+        SetStyleClass($"hl-{styleNumber % 10}");
+    }
+}
+
+
+### Contenuto di MyMatch.cs ###
+using SimilarityTextComparison.Core.Models.Position;
+
+namespace SimilarityTextComparison.Core.Models.Comparison;
+
+public class MyMatch
+{
+    public int SourceTextIndex { get; }
+    public int TargetTextIndex { get; }
+
+    public IndexedPositionalEntity SourcePosition { get; }
+    public IndexedPositionalEntity TargetPosition { get; }
+
+    public int SourceTokenkBeginPos => SourcePosition.BeginPosition;
+    public int TargetTokenBeginPos => TargetPosition.BeginPosition;
+    public int MatchLength => SourcePosition.Length;
+
+    //public MyMatch(
+    //    int sourceTextIndex,
+    //    PositionalEntity sourcePosition,
+    //    int targetTextIndex,
+    //    PositionalEntity targetPosition)
+    //{
+    //    SourceTextIndex = sourceTextIndex;
+    //    SourcePosition = sourcePosition ?? throw new ArgumentNullException(nameof(sourcePosition));
+    //    TargetTextIndex = targetTextIndex;
+    //    TargetPosition = targetPosition ?? throw new ArgumentNullException(nameof(targetPosition));
+    //}
+}
+
+
+### Contenuto di ScrollPosition.cs ###
+namespace SimilarityTextComparison.Core.Models.Comparison;
+
+public record ScrollPosition(int TopPadding, int BottomPadding, int YPosition);
+
+
+### Contenuto di CharacterPosition.cs ###
+namespace SimilarityTextComparison.Core.Models.Position;
+
+public class CharacterPosition : PositionalEntity
+{
+
+    /// <summary>
+    /// L'indice del primo carattere della parola nell'input originale (inclusivo).
+    /// </summary>
+    public int TextBeginPos => base.BeginPosition;
+
+    /// <summary>
+    /// L'indice dell'ultimo carattere della parola nell'input originale (non incluso).
+    /// </summary>
+    public int TextEndPos => base.EndPosition;
+
+    public CharacterPosition(int beginCharPos, int endCharPos)
+        : base(beginCharPos, endCharPos, PositionUnit.Character)
+    {
+    }
+
+    public bool Contains(int charPosition)
+    {
+        return charPosition >= BeginPosition && charPosition < EndPosition;
+    }
+}
+
+
+### Contenuto di PositionalEntity.cs ###
+namespace SimilarityTextComparison.Core.Models.Position;
+
+public abstract class PositionalEntity
+{
+    public int BeginPosition { get; protected set; }
+    public int EndPosition { get; protected set; }
+    public PositionUnit Unit { get; protected set; }
+
+    protected PositionalEntity(int beginPosition, int endPosition, PositionUnit unit)
+    {
+        if (endPosition < beginPosition)
+            throw new ArgumentException("EndPosition deve essere maggiore o uguale a BeginPosition.");
+
+        BeginPosition = beginPosition;
+        EndPosition = endPosition;
+        Unit = unit;
+    }
+
+    public int Length => EndPosition - BeginPosition;
+}
+
+public class IndexedPositionalEntity : TokenPosition
+{
+    public int TextIndex { get; private set; }
+
+    public IndexedPositionalEntity(int textIndex, int beginPosition, int endPosition)
+        : base(beginPosition, endPosition)
+    {
+        TextIndex = textIndex;
+    }
+}
+
+
+### Contenuto di PositionUnit.cs ###
+namespace SimilarityTextComparison.Core.Models.Position;
+
+public enum PositionUnit
+{
+    Token,
+    Character
+}
+
+
+### Contenuto di TokenPosition.cs ###
+namespace SimilarityTextComparison.Core.Models.Position;
+
+public class TokenPosition : PositionalEntity
+{
+    public int BeginPositionInToken => BeginPosition;
+    public int EndPositionInToken => EndPosition;
+
+    public TokenPosition(int beginTokenPos, int endTokenPos)
+        : base(beginTokenPos, endTokenPos, PositionUnit.Token)
+    {
+    }
+
+    public bool Overlaps(TokenPosition other)
+    {
+        return BeginPosition < other.EndPosition && other.BeginPosition < EndPosition;
+    }
+}
+
+
+### Contenuto di InputInfo.cs ###
+namespace SimilarityTextComparison.Core.Models.TextProcessing;
+
+public class InputInfo
+{
+    public string InputMode { get; }
+    public string FileName { get; }
+    public string Text { get; set; }
+
+    public InputInfo(string inputMode, string fileName, string text)
+    {
+        InputMode = inputMode;
+        FileName = fileName;
+        Text = text;
+    }
+}
+
+
+### Contenuto di MyInputText.cs ###
+using Microsoft.AspNetCore.Components.Forms;
+
+namespace SimilarityTextComparison.Core.Models.TextProcessing;
+public class MyInputText
+{
+    public string TabPaneId { get; private set; }
+    public string Mode { get; set; }
+    public bool IsHTML { get; private set; }
+    public string FileName { get; private set; }
+    public string Text { get; set; }
+    public string InputMode { get; set; }
+    public int NrOfCharacters { get; set; }
+    public int NrOfWords { get; set; }
+
+    public MyInputText(string mode = "Text", IBrowserFile file = null, string text = null, string tabPaneId = null)
+    {
+        TabPaneId = tabPaneId;
+        Mode = mode;
+        IsHTML = false;
+        FileName = file?.Name;
+        Text = text;
+    }
+
+    /// <summary>
+    /// Returns the approximate number of pages of the input string.
+    /// </summary>
+    /// <param name="maxCharactersPerPage">The maximum number of characters per page.</param>
+    /// <returns>The approximate number of pages.</returns>
+    public int GetNumberOfPages(int maxCharactersPerPage)
+    {
+        return Text?.Length / maxCharactersPerPage ?? 0;
+    }
+
+    /// <summary>
+    /// Resets the fields of MyInputText.
+    /// </summary>
+    public void ClearInput()
+    {
+        TabPaneId = null;
+        Mode = null;
+        FileName = null;
+        Text = null;
+    }
+
+
+    /// <summary>
+    /// Sets the fields for the file input.
+    /// </summary>
+    /// <param name="file">The file selected by the user.</param>
+    /// <param name="text">The file input string.</param>
+    /// <param name="tabPaneId">The ID of the tab pane.</param>
+    public void SetFileInput(IBrowserFile file, string text, string tabPaneId)
+    {
+        SetInput("File", file.Name, text, tabPaneId);
+    }
+
+    /// <summary>
+    /// Sets the fields for the text input.
+    /// </summary>
+    /// <param name="text">The text input string.</param>
+    /// <param name="tabPaneId">The ID of the tab pane.</param>
+    public void SetTextInput(string text, string tabPaneId)
+    {
+        string fileName = IsHTML ? "HTML text input" : "Plain text input";
+        SetInput("Text", fileName, text, tabPaneId);
+    }
+
+    private void SetInput(string mode, string fileName, string text, string tabPaneId)
+    {
+        TabPaneId = tabPaneId;
+        Mode = mode;
+        FileName = fileName;
+        Text = text;
+    }
+
+    /// <summary>
+    /// Sets the HTML option.
+    /// </summary>
+    /// <param name="newValue">Whether the input is HTML.</param>
+    public void SetHTMLOption(bool newValue)
+    {
+        IsHTML = newValue;
+    }
+}
+
+
+### Contenuto di ProcessedText.cs ###
+using SimilarityTextComparison.Core.Models.Position;
+
+namespace SimilarityTextComparison.Core.Models.TextProcessing;
+
+public class ProcessedText : CharacterPosition
+{
+    public string Text { get; }  
+    public InputInfo InputInformation { get; }
+    public TextStatistics Statistics { get; }
+    public TokenizationInfo Tokenization { get; }
+
+    public ProcessedText(string text, InputInfo inputInfo, TextStatistics statistics, TokenizationInfo tokenization)
+        : base(tokenization.TokenBeginPosition, tokenization.TokenEndPosition)
+    {
+        Text = text;  // Assegna il testo alla proprietà Text
+        InputInformation = inputInfo;
+        Statistics = statistics;
+        Tokenization = tokenization;
+    }
+}
+
+
+### Contenuto di TextStatistics.cs ###
+using System.Text.RegularExpressions;
+
+namespace SimilarityTextComparison.Core.Models.TextProcessing;
+
+public class TextStatistics
+{
+    public int NumberOfCharacters { get; }
+    public int NumberOfWords { get; }
+
+    public TextStatistics(string text)
+    {
+        NumberOfCharacters = text.Length;
+        NumberOfWords = CountWords(text);
+    }
+
+    private static int CountWords(string text)
+    {
+        // Conta le parole in base a spazi e caratteri non vuoti
+        return Regex.Matches(text, @"\S+").Count;
+    }
+}
+
+
+### Contenuto di Token.cs ###
+using SimilarityTextComparison.Core.Models.Position;
+
+namespace SimilarityTextComparison.Core.Models.TextProcessing;
+
+public class Token : CharacterPosition
+{
+    /// <summary>
+    /// Il testo della parola dopo essere stato "pulito" secondo le opzioni di confronto.
+    /// </summary>
+    public string Text { get; }
+
+    
+
+    /// <summary>
+    /// Costruttore della classe Token.
+    /// Ora calcola la posizione finale basata sulla lunghezza del testo.
+    /// </summary>
+    /// <param name="text">Il testo della parola dopo essere stato pulito.</param>
+    /// <param name="textBeginPos">L'indice del primo carattere della parola nell'input originale.</param>
+    public Token(string text, int textBeginPos)
+        : base(textBeginPos, textBeginPos + text.Length)
+    {
+        Text = text;
+    }
+}
+
+
+### Contenuto di TokenizationInfo.cs ###
+namespace SimilarityTextComparison.Core.Models.TextProcessing;
+
+public class TokenizationInfo
+{
+    public int TokenBeginPosition { get; }
+    public int TokenEndPosition { get; }
+
+    public TokenizationInfo(int beginPosition, int tokenCount)
+    {
+        TokenBeginPosition = beginPosition;
+        TokenEndPosition = beginPosition + tokenCount;
+    }
+}
+
+
+### Contenuto di ForwardReferenceManager.cs ###
+using SimilarityTextComparison.Core.Models.TextProcessing;
+using SimilarityTextComparison.Core.Services.TextProcessing;
+
+namespace SimilarityTextComparison.Core.Services.Comparison;
+
+public interface IForwardReferenceManager
+{
+    /// <summary>
+    /// Crea un dizionario di riferimenti avanzati (forward references) per ottimizzare il matching.
+    /// Per ogni sequenza di token ripetuta nel testo, viene creata una forward reference che punta
+    /// alla successiva occorrenza della stessa sequenza. Questo permette di saltare rapidamente alle
+    /// ripetizioni e migliorare l'efficienza del matching.
+    ///
+    /// **Esempio di forward reference:**
+    /// - Se la sequenza "cat sat" appare alla posizione 1 e si ripete alla posizione 6,
+    ///   viene creato un riferimento: 1 → 6.
+    /// </summary>
+    /// <param name="text">Il testo da analizzare.</param>
+    /// <returns>Un dizionario che mappa la posizione iniziale della sequenza alla posizione successiva.</returns>
+    Dictionary<int, int> CreateForwardReferences(ProcessedText text);
+}
+
+public class ForwardReferenceManager : IForwardReferenceManager
+{
+    private readonly Configuration.Configuration _configuration;
+
+    public ForwardReferenceManager(Configuration.Configuration configuration)
+    {
+        _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+    }
+
+    /// <summary>
+    /// Crea un dizionario di riferimenti avanzati (forward references) per ottimizzare il matching.
+    /// Per ogni sequenza di token ripetuta nel testo, viene creata una forward reference che punta
+    /// alla successiva occorrenza della stessa sequenza. Questo permette di saltare rapidamente alle
+    /// ripetizioni e migliorare l'efficienza del matching.
+    ///
+    /// **Esempio di forward reference:**
+    /// - Se la sequenza "cat sat" appare alla posizione 1 e si ripete alla posizione 6,
+    ///   viene creato un riferimento: 1 → 6.
+    /// </summary>
+    /// <param name="text">Il testo da analizzare.</param>
+    /// <returns>Un dizionario che mappa la posizione iniziale della sequenza alla posizione successiva.</returns>
+    public Dictionary<int, int> CreateForwardReferences(ProcessedText text)
+    {
+        // The tokenSequencePositions dictionary tracks the positions of token sequences within the text.
+        // This is used to update the forward references by storing the last seen position of each sequence.
+        // When a repeated sequence is found, its previous position is retrieved from this dictionary to create a forward reference pointing to the current position.
+        var tokenSequencePositions = new Dictionary<string, int>();
+        var forwardReferences = new Dictionary<int, int>();
+
+        //Usa una sliding window
+        for (int i = text.TextBeginPos; i + _configuration.MinMatchLength - 1 < text.TextEndPos; i++)
+        {
+            string tokenSequence = GenerateTokenSequenceString(i, _configuration.MinMatchLength);
+            int? previousPosition = FindPreviousPosition(tokenSequence, tokenSequencePositions);
+
+            if (previousPosition.HasValue)
+            {
+                CreateForwardReference(forwardReferences, previousPosition.Value, i);
+            }
+
+            UpdateCurrentPosition(tokenSequencePositions, tokenSequence, i);
+        }
+
+        return forwardReferences;
+    }
+
+    /// <summary>
+    /// Finds the previous position of the token sequence.
+    /// </summary>
+    private static int? FindPreviousPosition(string tokenSequence, Dictionary<string, int> tokenSequencePositions)
+    {
+        return tokenSequencePositions.ContainsKey(tokenSequence)
+            ? tokenSequencePositions[tokenSequence]
+            : null;
+    }
+
+    /// <summary>
+    /// Updates the current position of the token sequence in the dictionary.
+    /// </summary>
+    private static void UpdateCurrentPosition(Dictionary<string, int> tokenSequencePositions, string tokenSequence, int currentPosition)
+    {
+        tokenSequencePositions[tokenSequence] = currentPosition;
+    }
+
+    /// <summary>
+    /// Creates a forward reference from the previous position to the current position.
+    /// </summary>
+    private static void CreateForwardReference(Dictionary<int, int> forwardReferences, int previousPosition, int currentPosition)
+    {
+        forwardReferences[previousPosition] = currentPosition;
+    }
+
+    /// <summary>
+    /// Genera una stringa concatenando i testi dei token a partire da una posizione specificata.
+    /// </summary>
+    private static string GenerateTokenSequenceString(int startTokenIndex, int count)
+    {
+        var tokenSequence = Tokenizer.GlobalTokens
+            .Skip(startTokenIndex)
+            .Take(count);
+
+        return string.Concat(tokenSequence.Select(token => token.Text));
+    }
+
+}
+
+
+### Contenuto di Matcher.cs ###
+using SimilarityTextComparison.Core.Models.Comparison;
+using SimilarityTextComparison.Core.Models.Position;
+using SimilarityTextComparison.Core.Models.TextProcessing;
+
+namespace SimilarityTextComparison.Core.Services.Comparison
+{
+    public interface IMatcher
+    {
+        /// <summary>
+        /// Trova i segmenti corrispondenti tra il testo sorgente e il testo di destinazione.
+        /// </summary>
+        /// <param name="sourceTextIndex">Indice del testo sorgente.</param>
+        /// <param name="targetTextIndex">Indice del testo di destinazione.</param>
+        /// <param name="sourceText">Il testo sorgente.</param>
+        /// <param name="targetText">Il testo di destinazione.</param>
+        /// <param name="forwardReferences">I riferimenti avanzati per il testo sorgente.</param>
+        /// <param name="tokens">La lista di tutti i token.</param>
+        /// <returns>Una lista di liste di segmenti corrispondenti.</returns>
+        List<List<MatchSegment>> FindMatches(
+            int sourceTextIndex,
+            int targetTextIndex,
+            ProcessedText sourceText,
+            ProcessedText targetText,
+            Dictionary<int, int> forwardReferences,
+            List<Token> tokens);
+    }
+
+    public class Matcher : IMatcher
+    {
+        private readonly Configuration.Configuration _configuration;
+
+        public Matcher(Configuration.Configuration configuration)
+        {
+            _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
+        }
+
+        /// <summary>
+        /// Trova i segmenti corrispondenti tra il testo sorgente e il testo di destinazione.
+        /// </summary>
+        /// <param name="sourceTextIndex">Indice del testo sorgente.</param>
+        /// <param name="targetTextIndex">Indice del testo di destinazione.</param>
+        /// <param name="sourceText">Il testo sorgente.</param>
+        /// <param name="targetText">Il testo di destinazione.</param>
+        /// <param name="forwardReferences">I riferimenti avanzati per il testo sorgente.</param>
+        /// <param name="tokens">La lista di tutti i token.</param>
+        /// <returns>Una lista di liste di segmenti corrispondenti.</returns>
+        public List<List<MatchSegment>> FindMatches(
+            int sourceTextIndex,
+            int targetTextIndex,
+            ProcessedText sourceText,
+            ProcessedText targetText,
+            Dictionary<int, int> forwardReferences,
+            List<Token> tokens)
+        {
+            var matchingSegments = new List<List<MatchSegment>>();
+            int currentPosition = sourceText.BeginPosition;
+
+            // Continua finché ci sono abbastanza token rimanenti per un match di lunghezza minima
+            while (IsWithinMatchRange(currentPosition, sourceText.EndPosition))
+            {
+                // Trova il miglior match a partire dalla posizione corrente
+                var bestMatch = FindBestMatch(currentPosition, forwardReferences, tokens, targetText);
+
+                if (bestMatch != (null, null))
+                {
+                    // Aggiungi i segmenti corrispondenti alla lista dei risultati
+                    matchingSegments.Add(new List<MatchSegment>
+                    {
+                        new MatchSegment(sourceTextIndex, bestMatch.SourcePosition.BeginPosition, bestMatch.SourcePosition.Length),
+                        new MatchSegment(targetTextIndex, bestMatch.TargetPosition.BeginPosition, bestMatch.TargetPosition.Length)
+                    });
+                    // Avanza la posizione corrente di lunghezza del match trovato
+                    currentPosition += bestMatch.SourcePosition.Length;
+                }
+                else
+                {
+                    // Nessun match trovato, avanza di un token
+                    currentPosition++;
+                }
+            }
+
+            return matchingSegments;
+        }
+
+        /// <summary>
+        /// Verifica se ci sono abbastanza token rimanenti per cercare un match di lunghezza minima.
+        /// </summary>
+        /// <param name="currentPosition">La posizione corrente nel testo.</param>
+        /// <param name="endPosition">La posizione finale nel testo.</param>
+        /// <returns>True se ci sono abbastanza token, altrimenti False.</returns>
+        private bool IsWithinMatchRange(int currentPosition, int endPosition)
+        {
+            return currentPosition + _configuration.MinMatchLength <= endPosition;
+        }
+
+        /// <summary>
+        /// Trova il miglior match possibile a partire da una posizione specifica nel testo sorgente.
+        /// </summary>
+        /// <param name="sourceTokenStartPos">Posizione iniziale nel testo sorgente.</param>
+        /// <param name="forwardReferences">I riferimenti avanzati per il testo sorgente.</param>
+        /// <param name="tokens">La lista di tutti i token.</param>
+        /// <param name="targetText">Il testo di destinazione.</param>
+        /// <returns>Una tupla contenente le posizioni dei token del match nel sorgente e nel target.</returns>
+        private (TokenPosition SourcePosition, TokenPosition TargetPosition) FindBestMatch(
+            int sourceTokenStartPos,
+            Dictionary<int, int> forwardReferences,
+            List<Token> tokens,
+            ProcessedText targetText)
+        {
+            // Ottiene le posizioni potenziali di match nel testo di destinazione
+            var potentialMatchPositions = GetPotentialMatchPositions(sourceTokenStartPos, forwardReferences, targetText.BeginPosition);
+
+            (TokenPosition sourcePos, TokenPosition targetPos) bestMatch = (null, null);
+            int bestMatchLength = 0;
+
+            foreach (var targetTokenPos in potentialMatchPositions)
+            {
+                // Determina la lunghezza del match a partire dalle posizioni date
+                int matchLength = GetMatchLength(sourceTokenStartPos, targetTokenPos, tokens);
+
+                if (matchLength >= _configuration.MinMatchLength && matchLength > bestMatchLength)
+                {
+                    bestMatchLength = matchLength;
+
+                    var sourcePosition = new TokenPosition(sourceTokenStartPos, sourceTokenStartPos + matchLength);
+                    var targetPosition = new TokenPosition(targetTokenPos, targetTokenPos + matchLength);
+
+                    bestMatch = (sourcePosition, targetPosition);
+                }
+            }
+
+            return bestMatch;
+        }
+
+        /// <summary>
+        /// Ottiene le posizioni potenziali di match nel testo di destinazione per una data posizione nel sorgente.
+        /// </summary>
+        /// <param name="sourceTokenStartPos">Posizione iniziale nel testo sorgente.</param>
+        /// <param name="forwardReferences">I riferimenti avanzati per il testo sorgente.</param>
+        /// <param name="targetTokenBeginPos">Posizione iniziale nel testo di destinazione.</param>
+        /// <returns>Una collezione di posizioni di token nel testo di destinazione che potrebbero corrispondere.</returns>
+        private static IEnumerable<int> GetPotentialMatchPositions(
+            int sourceTokenStartPos,
+            Dictionary<int, int> forwardReferences,
+            int targetTokenBeginPos)
+        {
+            var tokenPos = sourceTokenStartPos;
+            var potentialMatches = new List<int>();
+
+            while (forwardReferences.TryGetValue(tokenPos, out int nextTokenPos))
+            {
+                tokenPos = nextTokenPos;
+
+                if (tokenPos >= targetTokenBeginPos)
+                {
+                    potentialMatches.Add(tokenPos);
+                }
+            }
+
+            return potentialMatches;
+        }
+
+        /// <summary>
+        /// Calcola la lunghezza del match tra il testo sorgente e il testo di destinazione a partire dalle posizioni specificate.
+        /// </summary>
+        /// <param name="sourceTokenStartPos">Posizione iniziale nel testo sorgente.</param>
+        /// <param name="targetTokenStartPos">Posizione iniziale nel testo di destinazione.</param>
+        /// <param name="tokens">La lista di tutti i token.</param>
+        /// <returns>La lunghezza del match trovato.</returns>
+        private static int GetMatchLength(int sourceTokenStartPos, int targetTokenStartPos, List<Token> tokens)
+        {
+            int matchLength = 0;
+
+            while (sourceTokenStartPos + matchLength < tokens.Count &&
+                   targetTokenStartPos + matchLength < tokens.Count &&
+                   tokens[sourceTokenStartPos + matchLength].Text == tokens[targetTokenStartPos + matchLength].Text)
+            {
+                matchLength++;
+            }
+
+            return matchLength;
+        }
+    }
+}
+
+
+### Contenuto di StyleApplier.cs ###
+using SimilarityTextComparison.Core.Models.Comparison;
+
+namespace SimilarityTextComparison.Core.Services.Comparison;
+
+public interface IStyleApplier
+{
+    List<List<MatchSegment>> ApplyStyles(List<List<MatchSegment>> matches);
+}
+
+public class StyleApplier : IStyleApplier
+{
+    public int UniqueMatches { get; private set; }
+
+    public List<List<MatchSegment>> ApplyStyles(List<List<MatchSegment>> matches)
+    {
+        var sortedMatches = SortMatches(matches, 1);
+        int styleClassCount = 1;
+        var uniqueMatches = new List<List<MatchSegment>>();
+
+        foreach (var match in sortedMatches)
+        {
+            AssignStyleToMatch(match, uniqueMatches, ref styleClassCount);
+        }
+
+        UniqueMatches = uniqueMatches.Count;
+        return uniqueMatches;
+    }
+
+    private static void AssignStyleToMatch(List<MatchSegment> currentMatch, List<List<MatchSegment>> uniqueMatches, ref int styleClassCount)
+    {
+        if (!uniqueMatches.Any())
+        {
+            InitializeFirstMatchStyle(currentMatch, uniqueMatches);
+            return;
+        }
+
+        var lastUniqueMatch = uniqueMatches.Last()[1];
+        var current = currentMatch[1];
+
+        if (IsNonOverlapping(lastUniqueMatch, current))
+        {
+            currentMatch[0].SetStyleClass(styleClassCount);
+            currentMatch[1].SetStyleClass(styleClassCount);
+            uniqueMatches.Add(currentMatch);
+            styleClassCount++;
+        }
+        else if (CanExtendOverlap(lastUniqueMatch, current))
+        {
+            ExtendOverlapStyles(lastUniqueMatch, current);
+            uniqueMatches.Add(currentMatch);
+        }
+    }
+
+    private static void InitializeFirstMatchStyle(List<MatchSegment> firstMatch, List<List<MatchSegment>> uniqueMatches)
+    {
+        firstMatch[0].SetStyleClass(0);
+        firstMatch[1].SetStyleClass(0);
+        uniqueMatches.Add(firstMatch);
+    }
+
+    private static bool IsNonOverlapping(MatchSegment lastUniqueMatch, MatchSegment currentMatch)
+    {
+        return lastUniqueMatch.TokenBeginPosition != currentMatch.TokenBeginPosition &&
+               lastUniqueMatch.GetTkEndPosition() - 1 < currentMatch.TokenBeginPosition;
+    }
+
+    private static bool CanExtendOverlap(MatchSegment lastUniqueMatch, MatchSegment currentMatch)
+    {
+        return lastUniqueMatch.GetTkEndPosition() < currentMatch.GetTkEndPosition();
+    }
+
+    private static void ExtendOverlapStyles(MatchSegment lastUniqueMatch, MatchSegment currentMatch)
+    {
+        if (lastUniqueMatch.Unit != currentMatch.Unit)
+        {
+            throw new InvalidOperationException("Le unità di posizione di lastUniqueMatch e currentMatch non sono coerenti.");
+        }
+
+        // Verifica se la classe di stile già contiene "overlapping"
+        var styleClass = lastUniqueMatch.StyleClass.EndsWith(" overlapping")
+            ? lastUniqueMatch.StyleClass
+            : $"{lastUniqueMatch.StyleClass} overlapping";
+
+        // Applica la nuova classe di stile a entrambi i MatchSegment
+        lastUniqueMatch.SetStyleClass(styleClass);
+        currentMatch.SetStyleClass(styleClass);
+
+        // Calcola il nuovo MatchLength basato sulle posizioni begin
+        currentMatch.MatchLength = currentMatch.BeginPosition - lastUniqueMatch.BeginPosition;
+    }
+
+
+    private static List<List<MatchSegment>> SortMatches(List<List<MatchSegment>> matches, int index)
+    {
+        var sorted = new List<List<MatchSegment>>(matches);
+        sorted.Sort((a, b) =>
+        {
+            int comparePos = a[index].TokenBeginPosition.CompareTo(b[index].TokenBeginPosition);
+            return comparePos != 0 ? comparePos : b[index].MatchLength.CompareTo(a[index].MatchLength);
+        });
+        return sorted;
+    }
+}
+
+
+### Contenuto di TextComparerMain.cs ###
+// TextComparer.cs
+
+using SimilarityTextComparison.Core.Interfaces;
+using SimilarityTextComparison.Core.Models.Comparison;
+using SimilarityTextComparison.Core.Models.TextProcessing;
+using SimilarityTextComparison.Core.Services.Matching;
+using SimilarityTextComparison.Core.Services.TextProcessing;
+
+namespace SimilarityTextComparison.Core.Services.Comparison
+{
+    public class TextComparer : ITextComparer
+    {
+        private readonly ITextPreparationService _textPreparationService;
+        private readonly MatchingPipeline _matchingPipeline;
+
+        public TextComparer(
+            ITextPreparationService textPreparationService,
+            MatchingPipeline matchingPipeline)
+        {
+            _textPreparationService = textPreparationService ?? throw new ArgumentNullException(nameof(textPreparationService));
+            _matchingPipeline = matchingPipeline ?? throw new ArgumentNullException(nameof(matchingPipeline));
+        }
+
+
+        /// <summary>
+        /// Confronta una lista di testi di input e restituisce i segmenti corrispondenti trovati.
+        /// </summary>
+        /// <param name="inputTexts">Lista dei testi di input da confrontare.</param>
+        /// <returns>Lista dei segmenti corrispondenti tra i testi.</returns>
+        /// <exception cref="ArgumentException">Se il numero di testi di input è inferiore a 2.</exception>
+        public async Task<List<List<MatchSegment>>> CompareAsync(List<InputInfo> inputTexts)
+        {
+            // Verifica che ci siano almeno due testi da confrontare
+            if (inputTexts == null || inputTexts.Count < 2)
+                throw new ArgumentException("Sono necessari almeno due testi per il confronto.", nameof(inputTexts));
+
+            // Preprocessa i testi di input: pulizia e tokenizzazione
+            var processedTexts = new List<ProcessedText>();
+            var allTokens = new List<Token>();
+            int currentTokenPosition = 0;
+
+            foreach (var inputText in inputTexts)
+            {
+                var textStatistics = new TextStatistics(inputText.Text);
+
+                // Pulisce il testo
+                var cleanedText = await _textPreparationService.PrepareTextAsync(inputText.Text);
+
+                // Tokenizza il testo pulito
+                var tokens = await _textPreparationService.PrepareTextAsync(inputText.Text);
+
+                // Crea un oggetto ProcessedText che rappresenta il testo processato
+                var tokenizationInfo = new TokenizationInfo(currentTokenPosition, tokens.Count);
+                var processedText = new ProcessedText(inputText.Text, inputText, textStatistics, tokenizationInfo);
+
+                processedTexts.Add(processedText);
+                allTokens.AddRange(tokens);
+                currentTokenPosition += tokens.Count;
+            }
+
+            // Crea il contesto della pipeline
+            var context = new MatchingContext
+            {
+                SourceText = processedTexts[0],
+                TargetText = processedTexts[1],
+                Tokens = allTokens
+            };
+
+            // Esegue la pipeline di matching
+            var matchingSegments = await _matchingPipeline.ExecuteAsync(context);
+
+            // Verifica se sono stati trovati segmenti corrispondenti
+            if (matchingSegments.Count > 0)
+            {
+                return matchingSegments;
+            }
+            else
+            {
+                throw new InvalidOperationException("Nessuna similarità trovata.");
+            }
+        }
+
+        
+    }
+}
+
+
+### Contenuto di Configuration.cs ###
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
+using SimilarityTextComparison.Core.Interfaces;
+
+namespace SimilarityTextComparison.Core.Services.Configuration
+{
+    public class Configuration : IConfiguration
+    {
+        public bool IgnoreLetterCase { get; private set; }
+        public bool IgnoreNumbers { get; private set; }
+        public bool IgnorePunctuation { get; private set; }
+        public bool ReplaceUmlaut { get; private set; }
+        public int MinMatchLength { get; private set; }
+
+        private readonly IStorageService _storage;
+
+        public Configuration(IStorageService storage)
+        {
+            _storage = storage ?? throw new ArgumentNullException(nameof(storage));
+            Task.Run(() => InitializeAsync());
+        }
+
+        public async Task InitializeAsync()
+        {
+            IgnoreLetterCase = await _storage.GetItemAsync<bool>("ignoreLetterCase");
+            IgnoreNumbers = await _storage.GetItemAsync<bool>("ignoreNumbers");
+            IgnorePunctuation = await _storage.GetItemAsync<bool>("ignorePunctuation");
+            ReplaceUmlaut = await _storage.GetItemAsync<bool>("replaceUmlaut");
+            MinMatchLength = await _storage.GetItemAsync<int>("minMatchLength");
+        }
+
+        public IConfigurationSection GetSection(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<IConfigurationSection> GetChildren()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IChangeToken GetReloadToken()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string? this[string key]
+        {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
+        }
+    }
+}
+
+
+### Contenuto di ControllerService.cs ###
+using SimilarityTextComparison.Core.Interfaces;
+using SimilarityTextComparison.Core.Models.Comparison;
+using SimilarityTextComparison.Core.Models.TextProcessing;
+
+namespace SimilarityTextComparison.Core.Services;
+
+public class ControllerService : IControllerService
+{
+    private readonly IStorageService _storageService;
+    private readonly ISimTexter _simTexter;
+
+    public ControllerService(IStorageService storageService, ISimTexter simTexter)
+    {
+        _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
+        _simTexter = simTexter ?? throw new ArgumentNullException(nameof(simTexter));
+    }
+
+    public async Task<List<List<MatchSegment>>> CompareTextsAsync(string input1, string input2)
+    {
+        ValidateInputs(input1, input2);
+        var inputTexts = CreateInputTexts(input1, input2);
+
+        return await ExecuteComparisonAsync(inputTexts);
+    }
+
+    private static void ValidateInputs(string input1, string input2)
+    {
+        if (string.IsNullOrWhiteSpace(input1) || string.IsNullOrWhiteSpace(input2))
+        {
+            throw new ArgumentException("Uno o entrambi i testi sono vuoti.");
+        }
+    }
+
+    private static List<MyInputText> CreateInputTexts(string input1, string input2)
+    {
+        return new List<MyInputText>
+        {
+            new MyInputText { Mode = "Text", Text = input1 },
+            new MyInputText { Mode = "Text", Text = input2 }
+        };
+    }
+
+    private async Task<List<List<MatchSegment>>> ExecuteComparisonAsync(List<MyInputText> inputTexts)
+    {
+        try
+        {
+            return await _simTexter.CompareAsync(inputTexts);
+        }
+        catch (Exception ex)
+        {
+            // Log dell'errore se necessario
+            throw new Exception($"Errore durante il confronto: {ex.Message}", ex);
+        }
+    }
+
+}
+
+
+### Contenuto di ForwardReferenceStep.cs ###
+using SimilarityTextComparison.Core.Services.Comparison;
+
+namespace SimilarityTextComparison.Core.Services.Matching
+{
+    public class ForwardReferenceStep : IMatchStep
+    {
+        private readonly IForwardReferenceManager _forwardReferenceManager;
+
+        public ForwardReferenceStep(IForwardReferenceManager forwardReferenceManager)
+        {
+            _forwardReferenceManager = forwardReferenceManager;
+        }
+
+        public Task ExecuteAsync(MatchingContext context)
+        {
+            context.ForwardReferences = _forwardReferenceManager.CreateForwardReferences(context.SourceText);
+            return Task.CompletedTask;
+        }
+    }
+}
+
+
+### Contenuto di IMatchStep.cs ###
+namespace SimilarityTextComparison.Core.Services.Matching
+{
+    public interface IMatchStep
+    {
+        Task ExecuteAsync(MatchingContext context);
+    }
+}
+
+
+### Contenuto di MatcherStep.cs ###
+using SimilarityTextComparison.Core.Services.Comparison;
+
+namespace SimilarityTextComparison.Core.Services.Matching;
+
+public class MatcherStep : IMatchStep
+{
+    private readonly IMatcher _matcher;
+
+    public MatcherStep(IMatcher matcher)
+    {
+        _matcher = matcher;
+    }
+
+    public Task ExecuteAsync(MatchingContext context)
+    {
+        var matches = _matcher.FindMatches(
+            sourceTextIndex: 0,
+            targetTextIndex: 1,
+            sourceText: context.SourceText,
+            targetText: context.TargetText,
+            forwardReferences: context.ForwardReferences,
+            tokens: context.Tokens);
+
+        context.MatchingSegments.AddRange(matches);
+        return Task.CompletedTask;
+    }
+}
+
+
+### Contenuto di MatchingContext.cs ###
+using SimilarityTextComparison.Core.Models.Comparison;
+using SimilarityTextComparison.Core.Models.TextProcessing;
+
+namespace SimilarityTextComparison.Core.Services.Matching;
+
+public class MatchingContext
+{
+    public ProcessedText SourceText { get; set; }
+    public ProcessedText TargetText { get; set; }
+    public Dictionary<int, int> ForwardReferences { get; set; }
+    public List<Token> Tokens { get; set; }
+    public List<List<MatchSegment>> MatchingSegments { get; set; }
+
+    public MatchingContext()
+    {
+        MatchingSegments = new List<List<MatchSegment>>();
+    }
+}
+
+
+### Contenuto di MatchingPipeline.cs ###
+using SimilarityTextComparison.Core.Models.Comparison;
+
+namespace SimilarityTextComparison.Core.Services.Matching
+{
+    public class MatchingPipeline
+    {
+        private readonly IEnumerable<IMatchStep> _steps;
+
+        public MatchingPipeline(IEnumerable<IMatchStep> steps)
+        {
+            _steps = steps;
+        }
+
+        public async Task<List<List<MatchSegment>>> ExecuteAsync(MatchingContext context)
+        {
+            foreach (var step in _steps)
+            {
+                await step.ExecuteAsync(context);
+            }
+
+            return context.MatchingSegments;
+        }
+    }
+}
+
+
+### Contenuto di StyleApplierStep.cs ###
+using SimilarityTextComparison.Core.Services.Comparison;
+
+namespace SimilarityTextComparison.Core.Services.Matching
+{
+    public class StyleApplierStep : IMatchStep
+    {
+        private readonly IStyleApplier _styleApplier;
+
+        public StyleApplierStep(IStyleApplier styleApplier)
+        {
+            _styleApplier = styleApplier;
+        }
+
+        public Task ExecuteAsync(MatchingContext context)
+        {
+            context.MatchingSegments = _styleApplier.ApplyStyles(context.MatchingSegments);
+            return Task.CompletedTask;
+        }
+    }
+}
+
+
+### Contenuto di StorageService.cs ###
+using Blazored.LocalStorage;
+using SimilarityTextComparison.Core.Interfaces;
+
+namespace SimilarityTextComparison.Core.Services.Storage
+{
+    public class StorageService : IStorageService
+    {
+        private readonly ILocalStorageService _localStorage;
+
+        public StorageService(ILocalStorageService localStorage)
+        {
+            _localStorage = localStorage ?? throw new ArgumentNullException(nameof(localStorage));
+        }
+
+        public async Task<T> GetItemAsync<T>(string key)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentException("Key cannot be null or empty.", nameof(key));
+            }
+
+            return await _localStorage.GetItemAsync<T>(key);
+        }
+
+        public async Task SetItemAsync<T>(string key, T value)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new ArgumentException("Key cannot be null or empty.", nameof(key));
+            }
+
+            await _localStorage.SetItemAsync(key, value);
+        }
+    }
+}
+
+
+### Contenuto di TextInputReader.cs ###
+using System.Text.RegularExpressions;
+using System.Xml.Linq;
+
+namespace SimilarityTextComparison.Core.Services.TextProcessing;
+
+public interface ITextInputReader
+{
+    /// <summary>
+    /// Legge l'input di testo HTML e restituisce il contenuto come stringa pulita.
+    /// </summary>
+    /// <param name="text">L'input HTML da cui estrarre il testo.</param>
+    /// <returns>Una task che rappresenta il testo estratto e pulito.</returns>
+    Task<string> ReadTextInputAsync(string htmlInput);
+
+    string CleanHtmlInput(string htmlInput);
+}
+
+public class TextInputReader : ITextInputReader
+{
+    /// <summary>
+    /// Legge l'input di testo HTML e restituisce il contenuto come stringa pulita.
+    /// </summary>
+    /// <param name="htmlInput">L'input HTML da cui estrarre il testo.</param>
+    /// <returns>Una task che rappresenta il testo estratto e pulito.</returns>
+    public async Task<string> ReadTextInputAsync(string htmlInput)
+    {
+        var cleanedText = await Task.Run(() => CleanHtmlInput(htmlInput));
+        return cleanedText;
+    }
+
+    public string CleanHtmlInput(string htmlInput)
+    {
+        var div = new XElement("div", XElement.Parse(htmlInput));
+        var extractedText = ExtractTextRecursively(div);
+
+        if (string.IsNullOrWhiteSpace(extractedText))
+        {
+            throw new Exception("HTML input has no valid text contents.");
+        }
+
+        extractedText = NormalizeWhitespace(extractedText);
+        return extractedText;
+    }
+
+    private static string NormalizeWhitespace(string text)
+    {
+        text = Regex.Replace(text, @"\n[\t\v ]*", "\n");
+        text = Regex.Replace(text, @"\n{3,}", "\n\n");
+        return text;
+    }
+
+
+    /// <summary>
+    /// Esplora ricorsivamente i nodi figli e restituisce il contenuto di testo dell'HTML come stringa.
+    /// </summary>
+    /// <param name="node">L'elemento HTML da cui estrarre il testo.</param>
+    /// <returns>Il contenuto di testo estratto.</returns>
+    private static string ExtractTextRecursively(XElement node)
+    {
+        var str = string.Empty;
+
+        // Regex per controllare le lettere (equivalente di XRegExp in JS)
+        var letterRegex = new Regex(@"^\p{L}+$");
+
+        if (IsValidNode(node.Name.LocalName) && node.HasElements)
+        {
+            foreach (var child in node.Nodes())
+            {
+                // Se è un nodo di testo
+                if (child is XText textNode)
+                {
+                    str += textNode.Value;
+                }
+                else if (child is XElement childElement)
+                {
+                    var extractedContent = ExtractTextRecursively(childElement);
+
+                    // Aggiunge uno spazio tra nodi di testo non separati da spazi o newline
+                    if (letterRegex.IsMatch(str.LastOrDefault().ToString()) && letterRegex.IsMatch(extractedContent.FirstOrDefault().ToString()))
+                    {
+                        str += " ";
+                    }
+
+                    str += extractedContent;
+                }
+            }
+        }
+
+        return str;
+
+        // Funzione per verificare se un nodo deve essere saltato
+        bool IsValidNode(string nodeName)
+        {
+            var skipNodes = new[] { "IFRAME", "NOSCRIPT", "SCRIPT", "STYLE" };
+            return !Array.Exists(skipNodes, skipNode => skipNode == nodeName);
+        }
+    }
+}
+
+
+### Contenuto di TextPreparationService.cs ###
+using Microsoft.Extensions.Configuration;
+using SimilarityTextComparison.Core.Models.TextProcessing;
+
+namespace SimilarityTextComparison.Core.Services.TextProcessing
+{
+    public interface ITextPreparationService
+    {
+        /// <summary>
+        /// Prepara il testo dall'input HTML o testo semplice.
+        /// </summary>
+        /// <param name="inputText">L'input di testo o HTML.</param>
+        /// <returns>Lista di token processati.</returns>
+        Task<List<Token>> PrepareTextAsync(string inputText);
+    }
+
+    /// <summary>
+    /// Classe responsabile dell'intero processo di preparazione del testo, inclusa la lettura, pulizia e tokenizzazione.
+    /// </summary>
+    public class TextPreparationService : ITextPreparationService
+    {
+        private readonly IConfiguration _config;
+        private readonly ITextInputReader _textInputReader;
+        private readonly ITextProcessor _textProcessor;
+        private readonly ITokenizer _tokenizer;
+
+        public TextPreparationService(
+            IConfiguration config,
+            ITextInputReader textInputReader,
+            ITextProcessor textProcessor,
+            ITokenizer tokenizer)
+        {
+            _config = config;
+            _textInputReader = textInputReader;
+            _textProcessor = textProcessor;
+            _tokenizer = tokenizer;
+        }
+
+        /// <summary>
+        /// Prepara il testo dall'input HTML o testo semplice.
+        /// </summary>
+        /// <param name="inputText">L'input di testo o HTML.</param>
+        /// <returns>Lista di token processati.</returns>
+        public async Task<List<Token>> PrepareTextAsync(string inputText)
+        {
+            string cleanedText = await _textInputReader.ReadTextInputAsync(inputText);
+            string processedText = _textProcessor.CleanText(cleanedText);
+            List<Token> tokens = _tokenizer.Tokenize(processedText);
+            return tokens;
+        }
+    }
+}
+
+
+### Contenuto di TextProcessor.cs ###
+using System.Text.RegularExpressions;
+
+namespace SimilarityTextComparison.Core.Services.TextProcessing;
+
+public interface ITextProcessor
+{
+    /// <summary>
+    /// Pulisce il testo applicando i filtri definiti dalla configurazione.
+    /// Le opzioni di configurazione controllano quali caratteri rimuovere (numeri, punteggiatura)
+    /// e se il testo deve essere convertito in minuscolo.
+    /// </summary>
+    /// <param name="text">Il testo da pulire.</param>
+    /// <returns>Il testo pulito e normalizzato.</returns>
+    string CleanText(string text);
+}
+
+/// <summary>
+/// Classe responsabile della pulizia del testo in base a una configurazione.
+/// Le opzioni di configurazione vengono tradotte in una serie di regex per rimuovere
+/// determinati caratteri (numeri, punteggiatura) e per applicare normalizzazioni (ad esempio, minuscolo).
+/// </summary>
+public class TextProcessor : ITextProcessor
+{
+    private readonly Configuration.Configuration _config;
+    private readonly Regex _filterRegex;
+
+    /// <summary>
+    /// Costruttore della classe TextProcessor.
+    /// Inizializza la configurazione e genera una regex basata sulle opzioni specificate nella configurazione.
+    /// </summary>
+    /// <param name="config">La configurazione che definisce le opzioni di pulizia del testo.</param>
+    public TextProcessor(Configuration.Configuration config)
+    {
+        _config = config;
+        // Trasforma le impostazioni di configurazione in una regex per filtrare il testo
+        _filterRegex = BuildFilterRegex();
+    }
+
+    /// <summary>
+    /// Pulisce il testo applicando i filtri definiti dalla configurazione.
+    /// Le opzioni di configurazione controllano quali caratteri rimuovere (numeri, punteggiatura)
+    /// e se il testo deve essere convertito in minuscolo.
+    /// </summary>
+    /// <param name="text">Il testo da pulire.</param>
+    /// <returns>Il testo pulito e normalizzato.</returns>
+    public string CleanText(string text)
+    {
+        // Applica i filtri regex per rimuovere i caratteri indesiderati
+        text = ApplyRegexFilters(text);
+        // Applica la normalizzazione del case (minuscolo) se configurato
+        text = ApplyCaseNormalization(text);
+        return text;
+    }
+
+    /// <summary>
+    /// Applica una regex precompilata per sostituire caratteri specifici (numeri, punteggiatura) con uno spazio.
+    /// La regex è stata costruita in base alla configurazione fornita.
+    /// </summary>
+    /// <param name="text">Il testo a cui applicare i filtri regex.</param>
+    /// <returns>Il testo filtrato.</returns>
+    private string ApplyRegexFilters(string text)
+    {
+        // Se la regex è stata generata, applicala, altrimenti restituisci il testo non modificato
+        return _filterRegex != null ? _filterRegex.Replace(text, " ") : text;
+    }
+
+    /// <summary>
+    /// Normalizza il case del testo in minuscolo se la configurazione richiede di ignorare la differenza tra maiuscole e minuscole.
+    /// </summary>
+    /// <param name="text">Il testo da normalizzare.</param>
+    /// <returns>Il testo convertito in minuscolo o originale se non è richiesta la normalizzazione.</returns>
+    private string ApplyCaseNormalization(string text)
+    {
+        // Controlla se la configurazione richiede di ignorare le maiuscole/minuscole
+        return _config.IgnoreLetterCase ? text.ToLowerInvariant() : text;
+    }
+
+    /// <summary>
+    /// Costruisce una regex basata sulle impostazioni di configurazione.
+    /// La regex combina più pattern per rimuovere numeri e punteggiatura, se configurato.
+    /// </summary>
+    /// <returns>
+    /// Una regex che filtra i caratteri definiti dalla configurazione (numeri, punteggiatura),
+    /// oppure null se non è necessario alcun filtro.
+    /// </returns>
+    private Regex? BuildFilterRegex()
+    {
+        var patterns = new List<string>();
+
+        // Aggiungi il pattern per ignorare i numeri, se configurato
+        if (_config.IgnoreNumbers)
+        {
+            patterns.Add(@"\p{N}"); // Pattern per i numeri
+        }
+
+        // Aggiungi il pattern per ignorare la punteggiatura, se configurato
+        if (_config.IgnorePunctuation)
+        {
+            patterns.Add(@"\p{P}"); // Pattern per la punteggiatura
+        }
+
+        // Se sono stati definiti dei pattern, creiamo una regex combinata
+        var combinedPattern = string.Join("", patterns);
+
+        // Restituisce una regex compilata che filtra numeri e/o punteggiatura, o null se non ci sono filtri
+        return !string.IsNullOrEmpty(combinedPattern) ? new Regex($"[{combinedPattern}]", RegexOptions.Compiled) : null;
+    }
+}
+
+
+### Contenuto di Tokenizer.cs ###
+using System.Text.RegularExpressions;
+using SimilarityTextComparison.Core.Models.TextProcessing;
+
+namespace SimilarityTextComparison.Core.Services.TextProcessing;
+
+public interface ITokenizer
+{
+    /// <summary>
+    /// Suddivide un testo in una lista di token, dove ciascun token rappresenta una parola.
+    /// </summary>
+    /// <returns>
+    /// Una lista di oggetti <see cref="Token"/>. Ogni token rappresenta una parola "pulita" dal testo originale.
+    /// Il token contiene:
+    /// - La parola "pulita" dopo la sostituzione di eventuali caratteri speciali (come umlauti).
+    /// - La posizione iniziale della parola nel testo originale.
+    /// - La posizione finale della parola (calcolata internamente in base alla lunghezza della parola).
+    /// Se una parola risulta vuota dopo la pulizia, non viene aggiunta alla lista.
+    /// </returns>
+    List<Token> Tokenize(string text);
+}
+
+public class Tokenizer : ITokenizer
+{
+    private readonly Configuration.Configuration _config;
+    public static List<Token> GlobalTokens;
+
+    public Tokenizer(Configuration.Configuration config)
+    {
+        _config = config;
+    }
+
+    /// <summary>
+    /// Suddivide un testo in una lista di token, dove ciascun token rappresenta una parola.
+    /// </summary>
+    /// <returns>
+    /// Una lista di oggetti <see cref="Token"/>. Ogni token rappresenta una parola "pulita" dal testo originale.
+    /// Il token contiene:
+    /// - La parola "pulita" dopo la sostituzione di eventuali caratteri speciali (come umlauti).
+    /// - La posizione iniziale della parola nel testo originale.
+    /// - La posizione finale della parola (calcolata internamente in base alla lunghezza della parola).
+    /// Se una parola risulta vuota dopo la pulizia, non viene aggiunta alla lista.
+    /// </returns>
+    public List<Token> Tokenize(string text)
+    {
+        var tokens = new List<Token>();
+        var matches = Regex.Matches(text, @"\S+");
+
+        foreach (Match match in matches)
+        {
+            var cleanedWord = ReplaceUmlauts(match.Value);
+
+            if (!string.IsNullOrEmpty(cleanedWord))
+            {
+                tokens.Add(new Token(text: cleanedWord, textBeginPos: match.Index));
+            }
+        }
+
+        GlobalTokens = tokens;
+
+        return tokens;
+    }
+
+    private string ReplaceUmlauts(string word)
+    {
+        if (!_config.ReplaceUmlaut) return word;
+
+        return word.Replace("ä", "ae")
+            .Replace("ö", "oe")
+            .Replace("ü", "ue")
+            .Replace("ß", "ss")
+            .Replace("Ä", "AE")
+            .Replace("Ö", "OE")
+            .Replace("Ü", "UE");
+    }
+}
+
+

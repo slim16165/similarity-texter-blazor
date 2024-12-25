@@ -1,7 +1,7 @@
-﻿using SimilarityTextComparison.Core.Models.Position;
-using SimilarityTextComparison.Core.Models.TextProcessing;
+﻿using SimilarityTextComparison.Domain.Models.Position;
+using SimilarityTextComparison.Domain.Models.TextProcessing;
 
-namespace SimilarityTextComparison.Core.Models.Comparison;
+namespace SimilarityTextComparison.Domain.Models.Comparison;
 
 public class MatchSegment : IndexedPositionalEntity
 {

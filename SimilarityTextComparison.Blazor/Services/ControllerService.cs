@@ -1,8 +1,8 @@
-﻿using SimilarityTextComparison.Core.Interfaces;
-using SimilarityTextComparison.Core.Models.Comparison;
-using SimilarityTextComparison.Core.Models.TextProcessing;
+﻿using SimilarityTextComparison.Blazor.Models;
+using SimilarityTextComparison.Domain.Models.Comparison;
+using SimilarityTextComparison.Infrastructure.Services;
 
-namespace SimilarityTextComparison.Core.Services;
+namespace SimilarityTextComparison.Blazor.Services;
 
 public class ControllerService : IControllerService
 {
@@ -53,4 +53,9 @@ public class ControllerService : IControllerService
         }
     }
 
+}
+
+public interface ISimTexter
+{
+    Task<List<List<MatchSegment>>> CompareAsync(List<MyInputText> inputTexts);
 }

@@ -1,11 +1,7 @@
-﻿using SimilarityTextComparison.Core.Models.Comparison;
+﻿using SimilarityTextComparison.Application.Interfaces;
+using SimilarityTextComparison.Domain.Models.Comparison;
 
-namespace SimilarityTextComparison.Core.Services.Comparison;
-
-public interface IStyleApplier
-{
-    List<List<MatchSegment>> ApplyStyles(List<List<MatchSegment>> matches);
-}
+namespace SimilarityTextComparison.Application.Services;
 
 public class StyleApplier : IStyleApplier
 {

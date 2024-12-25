@@ -1,18 +1,8 @@
 ﻿using System.Text.RegularExpressions;
+using SimilarityTextComparison.Domain.Interfaces;
+using SimilarityTextComparison.Infrastructure.Services;
 
-namespace SimilarityTextComparison.Core.Services.TextProcessing;
-
-public interface ITextProcessor
-{
-    /// <summary>
-    /// Pulisce il testo applicando i filtri definiti dalla configurazione.
-    /// Le opzioni di configurazione controllano quali caratteri rimuovere (numeri, punteggiatura)
-    /// e se il testo deve essere convertito in minuscolo.
-    /// </summary>
-    /// <param name="text">Il testo da pulire.</param>
-    /// <returns>Il testo pulito e normalizzato.</returns>
-    string CleanText(string text);
-}
+namespace SimilarityTextComparison.Domain.Services.TextProcessing;
 
 /// <summary>
 /// Classe responsabile della pulizia del testo in base a una configurazione.
@@ -21,7 +11,7 @@ public interface ITextProcessor
 /// </summary>
 public class TextProcessor : ITextProcessor
 {
-    private readonly Configuration.Configuration _config;
+    private readonly Configuration _config;
     private readonly Regex _filterRegex;
 
     /// <summary>
@@ -29,7 +19,7 @@ public class TextProcessor : ITextProcessor
     /// Inizializza la configurazione e genera una regex basata sulle opzioni specificate nella configurazione.
     /// </summary>
     /// <param name="config">La configurazione che definisce le opzioni di pulizia del testo.</param>
-    public TextProcessor(Configuration.Configuration config)
+    public TextProcessor(Configuration config)
     {
         _config = config;
         // Trasforma le impostazioni di configurazione in una regex per filtrare il testo

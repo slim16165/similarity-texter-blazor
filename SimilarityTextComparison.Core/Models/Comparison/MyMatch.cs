@@ -1,6 +1,6 @@
-﻿using SimilarityTextComparison.Core.Models.Position;
+﻿using SimilarityTextComparison.Domain.Models.Position;
 
-namespace SimilarityTextComparison.Core.Models.Comparison;
+namespace SimilarityTextComparison.Domain.Models.Comparison;
 
 public class MyMatch
 {

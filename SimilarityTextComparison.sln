@@ -5,7 +5,7 @@ VisualStudioVersion = 17.5.33516.290
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimilarityTextComparison.Blazor", "SimilarityTextComparison.Blazor\SimilarityTextComparison.Blazor.csproj", "{C5FBC512-D8B0-40F1-A0E3-ECDABABEC20E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimilarityTextComparison.Core", "SimilarityTextComparison.Core\SimilarityTextComparison.Core.csproj", "{4F9C7675-F788-4048-A8F2-CE69CE6561AA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimilarityTextComparison.Domain", "SimilarityTextComparison.Core\SimilarityTextComparison.Domain.csproj", "{4F9C7675-F788-4048-A8F2-CE69CE6561AA}"
 EndProject
 Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "OriginalJsFiles", "OriginalJsFiles\", "{605A5542-6AF3-426D-A7A1-B4E71611ACDD}"
 	ProjectSection(WebsiteProperties) = preProject
@@ -28,6 +28,10 @@ Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "OriginalJsFiles", "Original
 		SlnRelativePath = "OriginalJsFiles\"
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimilarityTextComparison.Application", "SimilarityTextComparison.Application\SimilarityTextComparison.Application.csproj", "{5BEBCD77-DDB5-45BA-A0EE-25ADF5A5EAD4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimilarityTextComparison.Infrastructure", "SimilarityTextComparison.Infrastructure\SimilarityTextComparison.Infrastructure.csproj", "{4BFF561B-D036-4A7E-91C9-6C58C3F03995}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -46,6 +50,14 @@ Global
 		{605A5542-6AF3-426D-A7A1-B4E71611ACDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{605A5542-6AF3-426D-A7A1-B4E71611ACDD}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{605A5542-6AF3-426D-A7A1-B4E71611ACDD}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{5BEBCD77-DDB5-45BA-A0EE-25ADF5A5EAD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5BEBCD77-DDB5-45BA-A0EE-25ADF5A5EAD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5BEBCD77-DDB5-45BA-A0EE-25ADF5A5EAD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5BEBCD77-DDB5-45BA-A0EE-25ADF5A5EAD4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BFF561B-D036-4A7E-91C9-6C58C3F03995}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BFF561B-D036-4A7E-91C9-6C58C3F03995}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BFF561B-D036-4A7E-91C9-6C58C3F03995}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BFF561B-D036-4A7E-91C9-6C58C3F03995}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

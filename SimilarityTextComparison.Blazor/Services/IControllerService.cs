@@ -1,6 +1,6 @@
-﻿using SimilarityTextComparison.Core.Models.Comparison;
+﻿using SimilarityTextComparison.Domain.Models.Comparison;
 
-namespace SimilarityTextComparison.Core.Interfaces;
+namespace SimilarityTextComparison.Blazor.Services;
 
 public interface IControllerService
 {

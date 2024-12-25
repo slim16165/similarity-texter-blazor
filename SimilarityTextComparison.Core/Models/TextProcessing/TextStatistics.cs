@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace SimilarityTextComparison.Core.Models.TextProcessing;
+namespace SimilarityTextComparison.Domain.Models.TextProcessing;
 
 public class TextStatistics
 {

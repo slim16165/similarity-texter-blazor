@@ -1,7 +1,7 @@
-﻿using SimilarityTextComparison.Core.Models.Comparison;
-using SimilarityTextComparison.Core.Models.TextProcessing;
+﻿using SimilarityTextComparison.Domain.Models.Comparison;
+using SimilarityTextComparison.Domain.Models.TextProcessing;
 
-namespace SimilarityTextComparison.Core.Services.Matching;
+namespace SimilarityTextComparison.Domain.Services.Matching;
 
 public class MatchingContext
 {

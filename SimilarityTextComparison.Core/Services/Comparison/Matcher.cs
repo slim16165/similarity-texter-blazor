@@ -1,35 +1,16 @@
-﻿using SimilarityTextComparison.Core.Models.Comparison;
-using SimilarityTextComparison.Core.Models.Position;
-using SimilarityTextComparison.Core.Models.TextProcessing;
+﻿using SimilarityTextComparison.Domain.Interfaces;
+using SimilarityTextComparison.Domain.Models.Comparison;
+using SimilarityTextComparison.Domain.Models.Position;
+using SimilarityTextComparison.Domain.Models.TextProcessing;
+using SimilarityTextComparison.Infrastructure.Services;
 
-namespace SimilarityTextComparison.Core.Services.Comparison
+namespace SimilarityTextComparison.Domain.Services.Comparison
 {
-    public interface IMatcher
-    {
-        /// <summary>
-        /// Trova i segmenti corrispondenti tra il testo sorgente e il testo di destinazione.
-        /// </summary>
-        /// <param name="sourceTextIndex">Indice del testo sorgente.</param>
-        /// <param name="targetTextIndex">Indice del testo di destinazione.</param>
-        /// <param name="sourceText">Il testo sorgente.</param>
-        /// <param name="targetText">Il testo di destinazione.</param>
-        /// <param name="forwardReferences">I riferimenti avanzati per il testo sorgente.</param>
-        /// <param name="tokens">La lista di tutti i token.</param>
-        /// <returns>Una lista di liste di segmenti corrispondenti.</returns>
-        List<List<MatchSegment>> FindMatches(
-            int sourceTextIndex,
-            int targetTextIndex,
-            ProcessedText sourceText,
-            ProcessedText targetText,
-            Dictionary<int, int> forwardReferences,
-            List<Token> tokens);
-    }
-
     public class Matcher : IMatcher
     {
-        private readonly Configuration.Configuration _configuration;
+        private readonly Configuration _configuration;
 
-        public Matcher(Configuration.Configuration configuration)
+        public Matcher(Configuration configuration)
         {
             _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
         }

@@ -1,7 +1,6 @@
 ﻿using Blazored.LocalStorage;
-using SimilarityTextComparison.Core.Interfaces;
 
-namespace SimilarityTextComparison.Core.Services.Storage
+namespace SimilarityTextComparison.Infrastructure.Services
 {
     public class StorageService : IStorageService
     {

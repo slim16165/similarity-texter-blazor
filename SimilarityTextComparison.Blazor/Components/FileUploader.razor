@@ -1,6 +1,4 @@
-﻿@using SimilarityTextComparison.Core.Interfaces
-@inject IStorageService StorageService
-
+﻿@using SimilarityTextComparison.Infrastructure.Services
 <div class="mb-3">
     <label for="fileInput" class="form-label">Carica file:</label>
     <InputFile id="fileInput" class="form-control" OnChange="HandleFileSelected" multiple />
@@ -14,6 +12,7 @@
     private bool isLoading = false;
     private string alertMessage;
     private string alertType;
+    private StorageService _storageService;
 
     private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
@@ -30,7 +29,7 @@
                 using var reader = new StreamReader(stream);
                 var content = await reader.ReadToEndAsync();
 
-                await StorageService.SetItemAsync($"file_{file.Name}", content);
+                await _storageService.SetItemAsync($"file_{file.Name}", content);
             }
 
             alertMessage = "File caricati con successo!";

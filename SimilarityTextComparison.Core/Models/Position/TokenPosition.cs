@@ -1,4 +1,4 @@
-﻿namespace SimilarityTextComparison.Core.Models.Position;
+﻿namespace SimilarityTextComparison.Domain.Models.Position;
 
 public class TokenPosition : PositionalEntity
 {

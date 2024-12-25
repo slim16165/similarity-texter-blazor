@@ -1,4 +1,4 @@
-﻿namespace SimilarityTextComparison.Core.Interfaces;
+﻿namespace SimilarityTextComparison.Infrastructure.Services;
 
 public interface IStorageService
 {

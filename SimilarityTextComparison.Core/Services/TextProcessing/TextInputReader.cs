@@ -1,19 +1,8 @@
 ﻿using System.Text.RegularExpressions;
 using System.Xml.Linq;
+using SimilarityTextComparison.Domain.Interfaces;
 
-namespace SimilarityTextComparison.Core.Services.TextProcessing;
-
-public interface ITextInputReader
-{
-    /// <summary>
-    /// Legge l'input di testo HTML e restituisce il contenuto come stringa pulita.
-    /// </summary>
-    /// <param name="text">L'input HTML da cui estrarre il testo.</param>
-    /// <returns>Una task che rappresenta il testo estratto e pulito.</returns>
-    Task<string> ReadTextInputAsync(string htmlInput);
-
-    string CleanHtmlInput(string htmlInput);
-}
+namespace SimilarityTextComparison.Domain.Services.TextProcessing;
 
 public class TextInputReader : ITextInputReader
 {

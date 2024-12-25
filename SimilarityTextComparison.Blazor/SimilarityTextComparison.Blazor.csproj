@@ -13,7 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SimilarityTextComparison.Core\SimilarityTextComparison.Core.csproj" />
+    <ProjectReference Include="..\SimilarityTextComparison.Core\SimilarityTextComparison.Domain.csproj" />
+    <ProjectReference Include="..\SimilarityTextComparison.Infrastructure\SimilarityTextComparison.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>

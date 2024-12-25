@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 
-namespace SimilarityTextComparison.Core.Models.TextProcessing;
+namespace SimilarityTextComparison.Blazor.Models;
 public class MyInputText
 {
     public string TabPaneId { get; private set; }

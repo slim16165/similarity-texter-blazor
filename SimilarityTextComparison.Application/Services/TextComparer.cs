@@ -1,12 +1,12 @@
 ﻿// TextComparer.cs
 
-using SimilarityTextComparison.Core.Interfaces;
-using SimilarityTextComparison.Core.Models.Comparison;
-using SimilarityTextComparison.Core.Models.TextProcessing;
-using SimilarityTextComparison.Core.Services.Matching;
-using SimilarityTextComparison.Core.Services.TextProcessing;
+using SimilarityTextComparison.Application.Interfaces;
+using SimilarityTextComparison.Domain.Interfaces;
+using SimilarityTextComparison.Domain.Models.Comparison;
+using SimilarityTextComparison.Domain.Models.TextProcessing;
+using SimilarityTextComparison.Domain.Services.Matching;
 
-namespace SimilarityTextComparison.Core.Services.Comparison
+namespace SimilarityTextComparison.Application.Services
 {
     public class TextComparer : ITextComparer
     {

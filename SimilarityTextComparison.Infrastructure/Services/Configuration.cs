@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Primitives;
-using SimilarityTextComparison.Core.Interfaces;
 
-namespace SimilarityTextComparison.Core.Services.Configuration
+namespace SimilarityTextComparison.Infrastructure.Services
 {
     public class Configuration : IConfiguration
     {

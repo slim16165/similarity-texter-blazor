@@ -1,6 +1,6 @@
-﻿using SimilarityTextComparison.Core.Models.Position;
+﻿using SimilarityTextComparison.Domain.Models.Position;
 
-namespace SimilarityTextComparison.Core.Models.TextProcessing;
+namespace SimilarityTextComparison.Domain.Models.TextProcessing;
 
 public class Token : CharacterPosition
 {
