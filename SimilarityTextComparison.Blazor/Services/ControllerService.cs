@@ -1,5 +1,7 @@
-﻿using SimilarityTextComparison.Blazor.Models;
-using SimilarityTextComparison.Domain.Models.Comparison;
+﻿using SimilarityTextComparison.Application.Interfaces;
+using SimilarityTextComparison.Blazor.Models;
+using SimilarityTextComparison.Domain.Models.Matching;
+using SimilarityTextComparison.Domain.Models.TextPreProcessing;
 using SimilarityTextComparison.Infrastructure.Services;
 
 namespace SimilarityTextComparison.Blazor.Services;
@@ -7,9 +9,9 @@ namespace SimilarityTextComparison.Blazor.Services;
 public class ControllerService : IControllerService
 {
     private readonly IStorageService _storageService;
-    private readonly ISimTexter _simTexter;
+    private readonly ITextComparer _simTexter;
 
-    public ControllerService(IStorageService storageService, ISimTexter simTexter)
+    public ControllerService(IStorageService storageService, ITextComparer simTexter)
     {
         _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
         _simTexter = simTexter ?? throw new ArgumentNullException(nameof(simTexter));
@@ -18,7 +20,7 @@ public class ControllerService : IControllerService
     public async Task<List<List<MatchSegment>>> CompareTextsAsync(string input1, string input2)
     {
         ValidateInputs(input1, input2);
-        var inputTexts = CreateInputTexts(input1, input2);
+        List<InputInfo> inputTexts = CreateInputTexts(input1, input2);
 
         return await ExecuteComparisonAsync(inputTexts);
     }
@@ -31,16 +33,16 @@ public class ControllerService : IControllerService
         }
     }
 
-    private static List<MyInputText> CreateInputTexts(string input1, string input2)
+    private static List<InputInfo> CreateInputTexts(string input1, string input2)
     {
-        return new List<MyInputText>
-        {
-            new MyInputText { Mode = "Text", Text = input1 },
-            new MyInputText { Mode = "Text", Text = input2 }
-        };
+        return
+        [
+            new InputInfo("", "", input1),
+            new InputInfo("", "", input2)
+        ];
     }
 
-    private async Task<List<List<MatchSegment>>> ExecuteComparisonAsync(List<MyInputText> inputTexts)
+    private async Task<List<List<MatchSegment>>> ExecuteComparisonAsync(List<InputInfo> inputTexts)
     {
         try
         {
@@ -52,10 +54,4 @@ public class ControllerService : IControllerService
             throw new Exception($"Errore durante il confronto: {ex.Message}", ex);
         }
     }
-
-}
-
-public interface ISimTexter
-{
-    Task<List<List<MatchSegment>>> CompareAsync(List<MyInputText> inputTexts);
 }

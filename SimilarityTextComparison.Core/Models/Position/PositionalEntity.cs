@@ -1,5 +1,13 @@
-﻿namespace SimilarityTextComparison.Domain.Models.Position;
+﻿using SimilarityTextComparison.Domain.Models.Position.Enum;
 
+namespace SimilarityTextComparison.Domain.Models.Position;
+
+/// <summary>
+/// Represents a generic positional entity in a text, with a defined start, end, and unit of measurement.
+/// </summary>
+/// <remarks>
+/// Subclasses like <see cref="CharacterPosition"/> and <see cref="TokenPosition"/> specialize this for different use cases.
+/// </remarks>
 public abstract class PositionalEntity
 {
     public int BeginPosition { get; protected set; }

@@ -1,4 +1,4 @@
-﻿using SimilarityTextComparison.Domain.Models.Comparison;
+﻿using SimilarityTextComparison.Domain.Models.Matching;
 
 namespace SimilarityTextComparison.Blazor.Services;
 

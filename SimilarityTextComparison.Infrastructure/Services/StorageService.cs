@@ -1,34 +1,33 @@
 ﻿using Blazored.LocalStorage;
 
-namespace SimilarityTextComparison.Infrastructure.Services
+namespace SimilarityTextComparison.Infrastructure.Services;
+
+public class StorageService : IStorageService
 {
-    public class StorageService : IStorageService
+    private readonly ILocalStorageService _localStorage;
+
+    public StorageService(ILocalStorageService localStorage)
     {
-        private readonly ILocalStorageService _localStorage;
+        _localStorage = localStorage ?? throw new ArgumentNullException(nameof(localStorage));
+    }
 
-        public StorageService(ILocalStorageService localStorage)
+    public async Task<T> GetItemAsync<T>(string key)
+    {
+        if (string.IsNullOrEmpty(key))
         {
-            _localStorage = localStorage ?? throw new ArgumentNullException(nameof(localStorage));
+            throw new ArgumentException("Key cannot be null or empty.", nameof(key));
         }
 
-        public async Task<T> GetItemAsync<T>(string key)
-        {
-            if (string.IsNullOrEmpty(key))
-            {
-                throw new ArgumentException("Key cannot be null or empty.", nameof(key));
-            }
+        return await _localStorage.GetItemAsync<T>(key);
+    }
 
-            return await _localStorage.GetItemAsync<T>(key);
+    public async Task SetItemAsync<T>(string key, T value)
+    {
+        if (string.IsNullOrEmpty(key))
+        {
+            throw new ArgumentException("Key cannot be null or empty.", nameof(key));
         }
 
-        public async Task SetItemAsync<T>(string key, T value)
-        {
-            if (string.IsNullOrEmpty(key))
-            {
-                throw new ArgumentException("Key cannot be null or empty.", nameof(key));
-            }
-
-            await _localStorage.SetItemAsync(key, value);
-        }
+        await _localStorage.SetItemAsync(key, value);
     }
 }

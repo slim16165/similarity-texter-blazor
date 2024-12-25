@@ -1,6 +1,8 @@
-﻿namespace SimilarityTextComparison.Domain.Models.Position;
+﻿using SimilarityTextComparison.Domain.Models.Position.Enum;
 
-public class TokenPosition : PositionalEntity
+namespace SimilarityTextComparison.Domain.Models.Position;
+
+public class TokenPosition : Position
 {
     public int BeginPositionInToken => BeginPosition;
     public int EndPositionInToken => EndPosition;
