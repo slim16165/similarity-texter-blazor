@@ -1,4 +1,5 @@
-﻿using ChatGPT_Splitter_Blazor_New.TextComparer.Model.TextProcessing;
+﻿using ChatGPT_Splitter_Blazor_New.TextComparer.Model.Position;
+using ChatGPT_Splitter_Blazor_New.TextComparer.Model.TextProcessing;
 
 namespace ChatGPT_Splitter_Blazor_New.TextComparer.Model.Comparison;
 
@@ -14,13 +15,9 @@ public class MatchSegment : IndexedPositionalEntity
 
     public string StyleClass { get; private set; }
 
-    public MatchSegment(int textIndex, PositionalEntity position) : base(textIndex, position.BeginPosition, position.EndPosition, PositionUnit.Token)
+    public MatchSegment(int textIndex, int tokenkBeginPos, int matchLength) : base(textIndex, tokenkBeginPos, tokenkBeginPos + matchLength)
     {
         StyleClass = string.Empty;
-    }
-
-    public MatchSegment(int textIndex, int tokenkBeginPos, int matchLength) : this(textIndex, new PositionalEntity(tokenkBeginPos, tokenkBeginPos + matchLength, PositionUnit.Token))
-    {
     }
 
     /// <summary>

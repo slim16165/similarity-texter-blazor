@@ -6,12 +6,24 @@ namespace ChatGPT_Splitter_Blazor_New.TextComparer.Services;
 public class Tokenizer
 {
     private readonly Configuration _config;
+    public static List<Token> GlobalTokens;
 
     public Tokenizer(Configuration config)
     {
         _config = config;
     }
 
+    /// <summary>
+    /// Suddivide un testo in una lista di token, dove ciascun token rappresenta una parola.
+    /// </summary>
+    /// <returns>
+    /// Una lista di oggetti <see cref="Token"/>. Ogni token rappresenta una parola "pulita" dal testo originale.
+    /// Il token contiene:
+    /// - La parola "pulita" dopo la sostituzione di eventuali caratteri speciali (come umlauti).
+    /// - La posizione iniziale della parola nel testo originale.
+    /// - La posizione finale della parola (calcolata internamente in base alla lunghezza della parola).
+    /// Se una parola risulta vuota dopo la pulizia, non viene aggiunta alla lista.
+    /// </returns>
     public List<Token> Tokenize(string text)
     {
         var tokens = new List<Token>();
@@ -23,9 +35,11 @@ public class Tokenizer
 
             if (!string.IsNullOrEmpty(cleanedWord))
             {
-                tokens.Add(new Token(cleanedWord, match.Index, match.Index + cleanedWord.Length));
+                tokens.Add(new Token(text: cleanedWord, textBeginPos: match.Index));
             }
         }
+
+        GlobalTokens = tokens;
 
         return tokens;
     }

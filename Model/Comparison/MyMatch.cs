@@ -1,4 +1,6 @@
-﻿namespace ChatGPT_Splitter_Blazor_New.TextComparer.Model.Comparison;
+﻿using ChatGPT_Splitter_Blazor_New.TextComparer.Model.Position;
+
+namespace ChatGPT_Splitter_Blazor_New.TextComparer.Model.Comparison;
 
 public class MyMatch
 {

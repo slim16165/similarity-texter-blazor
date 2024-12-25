@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using ChatGPT_Splitter_Blazor_New.TextComparer.Model.Comparison;
+﻿using ChatGPT_Splitter_Blazor_New.TextComparer.Model.Comparison;
 using ChatGPT_Splitter_Blazor_New.TextComparer.Model.TextProcessing;
 using ChatGPT_Splitter_Blazor_New.TextComparer.Services.Interfaces;
 
@@ -7,85 +6,93 @@ namespace ChatGPT_Splitter_Blazor_New.TextComparer.Services;
 
 public class SimTexter : ISimTexter
 {
-    private readonly Configuration _config;
-    private readonly TextProcessor _textProcessor;
+    private readonly Configuration _configuration;
     private readonly Tokenizer _tokenizer;
-    private readonly ForwardReferenceManager _forwardRefMgr;
+    private readonly ForwardReferenceManager _forwardReferenceManager;
     private readonly Matcher _matcher;
     private readonly StyleApplier _styleApplier;
 
-    public SimTexter(IStorageService storageService)
+    public SimTexter(IStorageService storageService = null)
     {
-        _config = new Configuration(storageService ?? throw new ArgumentNullException(nameof(storageService)));
-        _textProcessor = new TextProcessor(_config);
-        _tokenizer = new Tokenizer(_config);
-        _forwardRefMgr = new ForwardReferenceManager(_config);
-        _matcher = new Matcher(_config);
+        _configuration = new Configuration(storageService ?? throw new ArgumentNullException(nameof(storageService)));
+        _tokenizer = new Tokenizer(_configuration);
+        _forwardReferenceManager = new ForwardReferenceManager(_configuration);
+        _matcher = new Matcher(_configuration);
         _styleApplier = new StyleApplier();
     }
 
+    /// <summary>
+    /// Confronta una lista di testi di input e restituisce i segmenti corrispondenti trovati.
+    /// </summary>
+    /// <param name="inputTexts">Lista dei testi di input da confrontare.</param>
+    /// <returns>Lista dei segmenti corrispondenti tra i testi.</returns>
+    /// <exception cref="ArgumentException">Se il numero di testi di input è inferiore a 2.</exception>
     public async Task<List<List<MatchSegment>>> CompareAsync(List<MyInputText> inputTexts)
     {
+        // Verifica che ci siano almeno due testi da confrontare
         if (inputTexts == null || inputTexts.Count < 2)
-            throw new ArgumentException("Sono necessari almeno due testi per il confronto.");
+            throw new ArgumentException("Sono necessari almeno due testi per il confronto.", nameof(inputTexts));
 
-        // Processa i testi di input e ottieni testi e token
-        var (texts, tokens) = ProcessInputTexts(inputTexts);
+        // Processa i testi di input: pulizia e tokenizzazione
+        var processedTexts = PreprocessInputTexts(inputTexts);
 
-        // Crea i riferimenti avanti per il primo testo
-        var forwardReferences = _forwardRefMgr.CreateForwardReferences(texts[0], tokens);
+        // Crea i riferimenti avanzati per il primo testo per ottimizzare il processo di matching
+        var forwardReferences = _forwardReferenceManager.CreateForwardReferences(processedTexts[0]);
 
-        // Trova le similarità tra il primo e il secondo testo
-        var similarities = _matcher.FindMatches(0, 1, texts[0], texts[1], forwardReferences, tokens);
+        // Trova i segmenti corrispondenti tra il primo e il secondo testo
+        var matchingSegments = _matcher.FindMatches(
+            sourceTextIndex: 0,
+            targetTextIndex: 1,
+            sourceText: processedTexts[0],
+            targetText: processedTexts[1],
+            forwardReferences: forwardReferences,
+            tokens: Tokenizer.GlobalTokens);
 
-        if (similarities.Count > 0)
+        // Verifica se sono stati trovati segmenti corrispondenti
+        if (matchingSegments.Count > 0)
         {
-            return _styleApplier.ApplyStyles(similarities);
+            // Applica gli stili ai segmenti corrispondenti per la visualizzazione
+            return _styleApplier.ApplyStyles(matchingSegments);
         }
         else
         {
-            throw new Exception("Nessuna similarità trovata.");
+            throw new InvalidOperationException("Nessuna similarità trovata.");
         }
     }
 
-    private (List<MyText> texts, List<Token> tokens) ProcessInputTexts(List<MyInputText> inputTexts)
+    /// <summary>
+    /// Preprocessa i testi di input effettuando la pulizia e la tokenizzazione.
+    /// </summary>
+    /// <param name="inputTexts">Lista dei testi di input.</param>
+    /// <returns>Una tupla contenente la lista dei testi processati e la lista di tutti i token.</returns>
+    public List<MyText> PreprocessInputTexts(List<MyInputText> inputTexts)
     {
-        var texts = new List<MyText>();
-        var tokens = new List<Token>();
+        var processedTexts = new List<MyText>();
+        var allTokens = new List<Token>();
         int currentTokenPosition = 0;
 
         foreach (var inputText in inputTexts)
         {
-            var (text, textTokens) = ProcessSingleInputText(inputText, currentTokenPosition);
+            var inputInfo = new InputInfo(inputText.Mode, inputText.FileName);
+            var textStatistics = new TextStatistics(inputText.Text);
 
-            texts.Add(text);
-            tokens.AddRange(textTokens);
-            currentTokenPosition += textTokens.Count;
+            // Pulisce il testo rimuovendo caratteri indesiderati secondo le configurazioni
+            string cleanedText = new TextProcessor(_configuration).CleanText(inputText.Text);
+
+            // Tokenizza il testo pulito
+            var tokens = _tokenizer.Tokenize(cleanedText);
+
+            // Crea un oggetto MyText che rappresenta il testo processato
+            var tokenizationInfo = new TokenizationInfo(currentTokenPosition, tokens.Count);
+            var processedText = new MyText(cleanedText, inputInfo, textStatistics, tokenizationInfo);
+
+            processedTexts.Add(processedText);
+            allTokens.AddRange(tokens);
+            currentTokenPosition += tokens.Count;
         }
 
-        return (texts, tokens);
-    }
+        Tokenizer.GlobalTokens = allTokens;
 
-    private (MyText text, List<Token> tokens) ProcessSingleInputText(MyInputText inputText, int startingTokenPosition)
-    {
-        string cleanText = _textProcessor.CleanText(inputText.Text);
-        var tokens = _tokenizer.Tokenize(cleanText);
-
-        int wordCount = CountWords(cleanText);
-
-        var text = new MyText(
-            inputMode: inputText.Mode,
-            numberOfCharacters: inputText.Text.Length,
-            numberOfWords: wordCount,
-            fileName: inputText.FileName,
-            tokenBeginPosition: startingTokenPosition,
-            tokenEndPosition: startingTokenPosition + tokens.Count);
-
-        return (text, tokens);
-    }
-
-    private static int CountWords(string text)
-    {
-        return Regex.Matches(text, @"\S+").Count;
+        return processedTexts;
     }
 }
