@@ -1,8 +1,10 @@
-﻿using SimilarityTextComparison.Core.Interfaces;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Primitives;
+using SimilarityTextComparison.Core.Interfaces;
 
 namespace SimilarityTextComparison.Core.Services.Configuration
 {
-    public class Configuration
+    public class Configuration : IConfiguration
     {
         public bool IgnoreLetterCase { get; private set; }
         public bool IgnoreNumbers { get; private set; }
@@ -25,6 +27,27 @@ namespace SimilarityTextComparison.Core.Services.Configuration
             IgnorePunctuation = await _storage.GetItemAsync<bool>("ignorePunctuation");
             ReplaceUmlaut = await _storage.GetItemAsync<bool>("replaceUmlaut");
             MinMatchLength = await _storage.GetItemAsync<int>("minMatchLength");
+        }
+
+        public IConfigurationSection GetSection(string key)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<IConfigurationSection> GetChildren()
+        {
+            throw new NotImplementedException();
+        }
+
+        public IChangeToken GetReloadToken()
+        {
+            throw new NotImplementedException();
+        }
+
+        public string? this[string key]
+        {
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
     }
 }

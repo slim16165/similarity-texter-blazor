@@ -2,7 +2,12 @@
 
 namespace SimilarityTextComparison.Core.Services.Comparison;
 
-public class StyleApplier
+public interface IStyleApplier
+{
+    List<List<MatchSegment>> ApplyStyles(List<List<MatchSegment>> matches);
+}
+
+public class StyleApplier : IStyleApplier
 {
     public int UniqueMatches { get; private set; }
 

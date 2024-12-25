@@ -3,12 +3,24 @@ using System.Xml.Linq;
 
 namespace SimilarityTextComparison.Core.Services.TextProcessing;
 
-public class TextInputReader
+public interface ITextInputReader
 {
     /// <summary>
     /// Legge l'input di testo HTML e restituisce il contenuto come stringa pulita.
     /// </summary>
     /// <param name="text">L'input HTML da cui estrarre il testo.</param>
+    /// <returns>Una task che rappresenta il testo estratto e pulito.</returns>
+    Task<string> ReadTextInputAsync(string htmlInput);
+
+    string CleanHtmlInput(string htmlInput);
+}
+
+public class TextInputReader : ITextInputReader
+{
+    /// <summary>
+    /// Legge l'input di testo HTML e restituisce il contenuto come stringa pulita.
+    /// </summary>
+    /// <param name="htmlInput">L'input HTML da cui estrarre il testo.</param>
     /// <returns>Una task che rappresenta il testo estratto e pulito.</returns>
     public async Task<string> ReadTextInputAsync(string htmlInput)
     {
@@ -16,7 +28,7 @@ public class TextInputReader
         return cleanedText;
     }
 
-    private string CleanHtmlInput(string htmlInput)
+    public string CleanHtmlInput(string htmlInput)
     {
         var div = new XElement("div", XElement.Parse(htmlInput));
         var extractedText = ExtractTextRecursively(div);
@@ -50,13 +62,6 @@ public class TextInputReader
         // Regex per controllare le lettere (equivalente di XRegExp in JS)
         var letterRegex = new Regex(@"^\p{L}+$");
 
-        // Funzione per verificare se un nodo deve essere saltato
-        bool IsValidNode(string nodeName)
-        {
-            var skipNodes = new[] { "IFRAME", "NOSCRIPT", "SCRIPT", "STYLE" };
-            return !Array.Exists(skipNodes, skipNode => skipNode == nodeName);
-        }
-
         if (IsValidNode(node.Name.LocalName) && node.HasElements)
         {
             foreach (var child in node.Nodes())
@@ -82,5 +87,12 @@ public class TextInputReader
         }
 
         return str;
+
+        // Funzione per verificare se un nodo deve essere saltato
+        bool IsValidNode(string nodeName)
+        {
+            var skipNodes = new[] { "IFRAME", "NOSCRIPT", "SCRIPT", "STYLE" };
+            return !Array.Exists(skipNodes, skipNode => skipNode == nodeName);
+        }
     }
 }
