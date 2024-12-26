@@ -1,8 +1,7 @@
-﻿using SimilarityTextComparison.Application.Interfaces;
-using SimilarityTextComparison.Application.Interfaces.Styling;
+﻿using SimilarityTextComparison.Domain.Interfaces.Styling;
 using SimilarityTextComparison.Domain.Models.Matching;
 
-namespace SimilarityTextComparison.Application.Services.Styling;
+namespace SimilarityTextComparison.Application.Pipeline.PipelineSteps;
 
 public class StyleApplierStep : IMatchStep
 {

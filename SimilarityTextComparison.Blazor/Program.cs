@@ -1,16 +1,17 @@
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using SimilarityTextComparison.Application;
 using SimilarityTextComparison.Application.Interfaces;
-using SimilarityTextComparison.Application.Interfaces.Styling;
-using SimilarityTextComparison.Application.Services;
-using SimilarityTextComparison.Application.Services.Matching;
-using SimilarityTextComparison.Application.Services.Styling;
+using SimilarityTextComparison.Application.Pipeline;
+using SimilarityTextComparison.Application.Pipeline.PipelineSteps;
 using SimilarityTextComparison.Blazor;
 using SimilarityTextComparison.Blazor.Services;
 using SimilarityTextComparison.Domain.Interfaces.Matching;
+using SimilarityTextComparison.Domain.Interfaces.Styling;
 using SimilarityTextComparison.Domain.Interfaces.TextProcessing;
 using SimilarityTextComparison.Domain.Services.Matching;
+using SimilarityTextComparison.Domain.Services.Styling;
 using SimilarityTextComparison.Domain.Services.TextPreProcessing;
 using SimilarityTextComparison.Infrastructure.Services;
 

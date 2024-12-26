@@ -1,6 +1,6 @@
 ﻿using SimilarityTextComparison.Domain.Models.Matching;
 
-namespace SimilarityTextComparison.Application.Interfaces.Styling;
+namespace SimilarityTextComparison.Domain.Interfaces.Styling;
 
 public interface IStyleApplier
 {

@@ -1,7 +1,6 @@
-﻿using SimilarityTextComparison.Application.Interfaces;
-using SimilarityTextComparison.Domain.Models.Matching;
+﻿using SimilarityTextComparison.Domain.Models.Matching;
 
-namespace SimilarityTextComparison.Application.Services;
+namespace SimilarityTextComparison.Application.Pipeline;
 
 public class MatchingPipeline
 {

@@ -1,7 +1,7 @@
-﻿using SimilarityTextComparison.Application.Interfaces.Styling;
+﻿using SimilarityTextComparison.Domain.Interfaces.Styling;
 using SimilarityTextComparison.Domain.Models.Matching;
 
-namespace SimilarityTextComparison.Application.Services.Styling;
+namespace SimilarityTextComparison.Domain.Services.Styling;
 
 public class StyleApplier : IStyleApplier
 {

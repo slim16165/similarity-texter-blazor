@@ -1,8 +1,7 @@
-﻿using SimilarityTextComparison.Application.Interfaces;
-using SimilarityTextComparison.Domain.Interfaces.Matching;
+﻿using SimilarityTextComparison.Domain.Interfaces.Matching;
 using SimilarityTextComparison.Domain.Models.Matching;
 
-namespace SimilarityTextComparison.Application.Services.Matching
+namespace SimilarityTextComparison.Application.Pipeline.PipelineSteps
 {
     public class MatchSegmentMergerStep : IMatchStep
     {
