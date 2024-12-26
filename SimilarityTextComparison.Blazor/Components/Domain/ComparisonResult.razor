@@ -1,54 +1,64 @@
 ﻿@using SimilarityTextComparison.Domain.Models.Matching
 @using SimilarityTextComparison.Domain.Models.TextPreProcessing
+
 @if (Results != null && Results.Any())
 {
-    <h4>Risultati del Confronto</h4>
-    @foreach (var result in Results)
-    {
-        <div class="card mb-3">
-            <div class="card-body">
-                <p class="card-text">
-                    <strong>Testo @(result.TextIndex + 1):</strong>
-                    @GetMatchText(result, Tokens)
-                </p>
-            </div>
-        </div>
-    }
+	<div class="card mb-3">
+		<div class="card-body">
+			<p class="card-text">
+				<strong>Testo @(Results.FirstOrDefault()?.TextIndex + 1 ?? 1):</strong>
+				@((MarkupString)GetHighlightedText(Results.FirstOrDefault(), Tokens))
+			</p>
+		</div>
+	</div>
 }
 else
 {
-    <p>Nessun risultato da mostrare.</p>
+	<p>Nessun risultato da mostrare.</p>
 }
 
 @code {
-    [Parameter]
-    public List<MatchSegment> Results { get; set; }
+	[Parameter]
+	public List<MatchSegment> Results { get; set; }
 
-    [Parameter]
-    public List<Token> Tokens { get; set; }
+	[Parameter]
+	public List<Token> Tokens { get; set; }
 
-    private string GetMatchText(MatchSegment match, List<Token> tokens)
-    {
-        int startPos = match.GetTxtBeginPos(tokens);
-        int endPos = match.GetTxtEndPos(tokens);
+	[Parameter]
+	public string MyInputText1 { get; set; }
 
-        // Assumiamo che il testo originale sia accessibile tramite una proprietà o metodo
-        string originalText = GetOriginalText(match.TextIndex);
+	[Parameter]
+	public string MyInputText2 { get; set; }
 
-        return originalText.Substring(startPos, endPos - startPos + 1);
-    }
+	private string GetHighlightedText(MatchSegment match, List<Token> tokens)
+	{
+		if (match == null)
+			return string.Empty;
 
-    private string GetOriginalText(int textIndex)
-    {
+		int startPos = match.GetTxtBeginPos(tokens);
+		int endPos = match.GetTxtEndPos(tokens);
+
+		string originalText = GetOriginalText(match.TextIndex);
+		if (originalText == null)
+			return string.Empty;
+
+		// Gestione degli indici per evitare errori
+		if (startPos < 0 || endPos >= originalText.Length || startPos > endPos)
+			return originalText;
+
+		string matchedText = originalText.Substring(startPos, endPos - startPos + 1);
+
+		// Avvolge il testo corrispondente con uno span per evidenziare
+		return originalText.Substring(0, startPos) +
+		       $"<span class=\"highlight\">{matchedText}</span>" +
+		       originalText.Substring(endPos + 1);
+	}
+
+	private string GetOriginalText(int textIndex)
+	{
         // Implementa questo metodo per restituire il testo originale basato sull'indice
         // Potrebbe essere necessario passare i testi originali come parametri aggiuntivi
         // o memorizzarli in una proprietà della classe
-        return textIndex == 0 ? MyInputText1 : MyInputText2;
-    }
-
-    [Parameter]
-    public string MyInputText1 { get; set; }
-
-    [Parameter]
-    public string MyInputText2 { get; set; }
+		return textIndex == 0 ? MyInputText1 : MyInputText2;
+	}
 }

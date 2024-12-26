@@ -1,34 +1,25 @@
 ﻿@if (!string.IsNullOrEmpty(Message))
 {
-    <div class="alert @AlertClass" role="alert">
-        <table class="table table-condensed">
-            <tbody>
-            <tr>
-                <td class="h5"><i class="fa fa-exclamation-circle"></i></td>
-                <td>
-                    <h5>@Type</h5>
-                    <p>@Message</p>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
+	<div class="alert @AlertClass alert-dismissible fade show" role="alert">
+		<strong>@Type!</strong> @Message
+		<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+	</div>
 }
 
 @code {
-    [Parameter]
-    public string Type { get; set; }
+	[Parameter]
+	public string Type { get; set; }
 
-    [Parameter]
-    public string Message { get; set; }
+	[Parameter]
+	public string Message { get; set; }
 
-    [Parameter]
-    public string AlertType { get; set; } = "info";
+	[Parameter]
+	public string AlertType { get; set; } = "info";
 
-    private string AlertClass => AlertType switch
-    {
-        "warning" => "alert-warning",
-        "danger" => "alert-danger",
-        _ => "alert-info",
-    };
+	private string AlertClass => AlertType switch
+	{
+		"warning" => "alert-warning",
+		"danger" => "alert-danger",
+		_ => "alert-info",
+	};
 }

@@ -1,17 +1,49 @@
-﻿@inherits LayoutComponentBase
+﻿@using SimilarityTextComparison.Blazor.Components.Domain
+@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+<PageTitle>Confronto Testi</PageTitle>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
+<!-- Navbar Fissa -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom fixed-top">
+	<div class="container-fluid">
+		<button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#settingsSidebar" aria-controls="settingsSidebar">
+			<i class="fa fa-cogs"></i> Impostazioni
+		</button>
+		<button class="btn btn-primary ms-2" @onclick="ToggleInputPanel">
+			<i class="fa fa-files-o"></i> Input
+		</button>
+		<button class="btn btn-primary ms-2" @onclick="NavigateToDocumentation">
+			<i class="fa fa-info"></i> Documentazione
+		</button>
+	</div>
+</nav>
 
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+<!-- Sidebar Offcanvas -->
+<div class="offcanvas offcanvas-start" tabindex="-1" id="settingsSidebar" aria-labelledby="settingsSidebarLabel">
+	<div class="offcanvas-header">
+		<h5 class="offcanvas-title" id="settingsSidebarLabel">Impostazioni</h5>
+		<button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+		<Settings />
+	</div>
 </div>
+
+<!-- Pagina Principale -->
+<div class="container-fluid">
+	@Body
+</div>
+
+@code {
+	private void ToggleInputPanel()
+	{
+		// Implementa la logica per mostrare/nascondere il pannello di input se necessario
+	}
+
+	private void NavigateToDocumentation()
+	{
+		// Implementa la navigazione alla documentazione o rimuovi questo pulsante se non necessario
+		// Ad esempio:
+		// NavigationManager.NavigateTo("/documentation");
+	}
+}

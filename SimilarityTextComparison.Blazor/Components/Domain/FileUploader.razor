@@ -1,49 +1,49 @@
 ﻿@using SimilarityTextComparison.Infrastructure.Services
+@inject IStorageService StorageService
+
 <div class="mb-3">
-    <label for="fileInput" class="form-label">Carica file:</label>
-    <InputFile id="fileInput" class="form-control" OnChange="HandleFileSelected" multiple />
+	<label class="form-label">@Title:</label>
+	<InputFile OnChange="HandleFileSelected" accept=".docx, .odt, .txt" />
 </div>
 
-<Loader IsLoading="isLoading" />
-<AlertMessage Message="alertMessage" AlertType="alertType" />
+@code {
+	[Parameter]
+	public string Title { get; set; }
 
-@code
-{
-    private bool isLoading = false;
-    private string alertMessage;
-    private string alertType;
-    private StorageService _storageService;
+	[Parameter]
+	public string FileContent { get; set; }
 
-    private async Task HandleFileSelected(InputFileChangeEventArgs e)
-    {
-        isLoading = true;
-        alertMessage = string.Empty;
+	[Parameter]
+	public EventCallback<string> FileContentChanged { get; set; }
 
-        StateHasChanged();
+	private bool isLoading = false;
+	private string alertMessage;
+	private string alertType;
 
-        try
-        {
-            foreach (var file in e.GetMultipleFiles())
-            {
-                using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10 MB limit
-                using var reader = new StreamReader(stream);
-                var content = await reader.ReadToEndAsync();
+	private async Task HandleFileSelected(InputFileChangeEventArgs e)
+	{
+		isLoading = true;
+		alertMessage = string.Empty;
 
-                await _storageService.SetItemAsync($"file_{file.Name}", content);
-            }
+		try
+		{
+			var file = e.File;
+			await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10 MB limit
+			using var reader = new StreamReader(stream);
+			var content = await reader.ReadToEndAsync();
 
-            alertMessage = "File caricati con successo!";
-            alertType = "info";
-        }
-        catch (Exception ex)
-        {
-            alertMessage = $"Errore durante il caricamento dei file: {ex.Message}";
-            alertType = "danger";
-        }
-        finally
-        {
-            isLoading = false;
-            StateHasChanged();
-        }
-    }
+			await StorageService.SetItemAsync($"file_{Title}", content);
+			await FileContentChanged.InvokeAsync(content);
+		}
+		catch (Exception ex)
+		{
+			alertMessage = $"Errore durante il caricamento del file: {ex.Message}";
+			alertType = "danger";
+		}
+		finally
+		{
+			isLoading = false;
+			StateHasChanged();
+		}
+	}
 }

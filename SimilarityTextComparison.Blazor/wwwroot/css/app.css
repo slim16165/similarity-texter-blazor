@@ -1,9 +1,11 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
 
+/* Font Globale */
 html, body {
-    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-family: 'Roboto', sans-serif; /* Preferenza per Roboto */
 }
 
+/* Stili per Titoli e Link */
 h1:focus {
     outline: none;
 }
@@ -12,20 +14,31 @@ a, .btn-link {
     color: #0071c1;
 }
 
+/* Pulsanti Primari */
 .btn-primary {
     color: #fff;
     background-color: #1b6ec2;
     border-color: #1861ac;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 16px;
+    transition: background-color 0.3s;
 }
+
+    .btn-primary:hover {
+        background-color: #0056b3; /* Colore più scuro al passaggio del mouse */
+    }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
+/* Contenuto */
 .content {
     padding-top: 1.1rem;
 }
 
+/* Validazione */
 .valid.modified:not([type=checkbox]) {
     outline: 1px solid #26b050;
 }
@@ -38,6 +51,7 @@ a, .btn-link {
     color: red;
 }
 
+/* UI di Errore Blazor */
 #blazor-error-ui {
     background: lightyellow;
     bottom: 0;
@@ -64,7 +78,7 @@ a, .btn-link {
 }
 
     .blazor-error-boundary::after {
-        content: "An error has occurred."
+        content: "An error has occurred.";
     }
 
 .loading-progress {
@@ -96,6 +110,24 @@ a, .btn-link {
     inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
 }
 
-    .loading-progress-text:after {
+    .loading-progress-text:after { 
         content: var(--blazor-load-percentage-text, "Loading");
     }
+
+/* Evidenziazione del testo */
+.highlight {
+    background-color: #ffecb3; /* Giallo chiaro */
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+/* Sidebar */
+.sidebar {
+    /* Non necessaria ulteriori regole qui poiché utilizziamo Offcanvas di Bootstrap */
+}
+
+/* Altri stili personalizzati, se necessari */
+
+body {
+    padding-top: 56px; /* Compensare la navbar fissa */
+}
