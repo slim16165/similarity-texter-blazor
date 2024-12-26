@@ -1,5 +1,4 @@
 ﻿using SimilarityTextComparison.Application.Interfaces;
-using SimilarityTextComparison.Application.Services.Matching;
 using SimilarityTextComparison.Domain.Interfaces.TextProcessing;
 using SimilarityTextComparison.Domain.Models.Matching;
 using SimilarityTextComparison.Domain.Models.TextPreProcessing;

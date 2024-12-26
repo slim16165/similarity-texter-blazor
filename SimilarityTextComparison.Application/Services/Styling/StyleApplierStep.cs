@@ -1,4 +1,4 @@
-﻿using SimilarityTextComparison.Application.Interfaces.Matching;
+﻿using SimilarityTextComparison.Application.Interfaces;
 using SimilarityTextComparison.Application.Interfaces.Styling;
 using SimilarityTextComparison.Domain.Models.Matching;
 

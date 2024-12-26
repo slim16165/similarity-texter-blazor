@@ -11,7 +11,7 @@ namespace SimilarityTextComparison.Domain.Services.TextPreProcessing;
 /// </summary>
 public class TextProcessor : ITextProcessor
 {
-    private readonly Configuration _config;
+    private readonly TextComparisonConfiguration _config;
     private readonly Regex _filterRegex;
 
     /// <summary>
@@ -19,7 +19,7 @@ public class TextProcessor : ITextProcessor
     /// Inizializza la configurazione e genera una regex basata sulle opzioni specificate nella configurazione.
     /// </summary>
     /// <param name="config">La configurazione che definisce le opzioni di pulizia del testo.</param>
-    public TextProcessor(Configuration config)
+    public TextProcessor(TextComparisonConfiguration config)
     {
         _config = config;
         // Trasforma le impostazioni di configurazione in una regex per filtrare il testo

@@ -10,9 +10,9 @@ namespace SimilarityTextComparison.Domain.Services.Matching;
 /// </summary>
 public class ForwardReferenceManager : IForwardReferenceManager
 {
-    private readonly Configuration _configuration;
+    private readonly TextComparisonConfiguration _configuration;
 
-    public ForwardReferenceManager(Configuration configuration)
+    public ForwardReferenceManager(TextComparisonConfiguration configuration)
     {
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }

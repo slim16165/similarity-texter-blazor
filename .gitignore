@@ -364,3 +364,4 @@ FodyWeavers.xsd
 /ChatGPT Splitter Blazor/appsettings.json
 /ChatGPT Splitter Blazor/appsettings.local.json
 /.vscode
+/CombinedFile.cs

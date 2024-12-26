@@ -10,10 +10,10 @@ namespace SimilarityTextComparison.Domain.Services.TextPreProcessing;
 /// </summary>
 public class Tokenizer : ITokenizer
 {
-    private readonly Configuration _config;
+    private readonly TextComparisonConfiguration _config;
     public static List<Token> GlobalTokens;
 
-    public Tokenizer(Configuration config)
+    public Tokenizer(TextComparisonConfiguration config)
     {
         _config = config;
     }

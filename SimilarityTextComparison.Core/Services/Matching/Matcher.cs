@@ -11,9 +11,9 @@ namespace SimilarityTextComparison.Domain.Services.Matching;
 /// </summary>
 public class Matcher : IMatcher
 {
-    private readonly Configuration _configuration;
+    private readonly TextComparisonConfiguration _configuration;
 
-    public Matcher(Configuration configuration)
+    public Matcher(TextComparisonConfiguration configuration)
     {
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }

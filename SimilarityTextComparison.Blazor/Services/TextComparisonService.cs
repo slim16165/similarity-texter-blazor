@@ -6,12 +6,12 @@ using SimilarityTextComparison.Infrastructure.Services;
 
 namespace SimilarityTextComparison.Blazor.Services;
 
-public class ControllerService : IControllerService
+public class TextComparisonService : IControllerService
 {
     private readonly IStorageService _storageService;
     private readonly ITextComparer _simTexter;
 
-    public ControllerService(IStorageService storageService, ITextComparer simTexter)
+    public TextComparisonService(IStorageService storageService, ITextComparer simTexter)
     {
         _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
         _simTexter = simTexter ?? throw new ArgumentNullException(nameof(simTexter));

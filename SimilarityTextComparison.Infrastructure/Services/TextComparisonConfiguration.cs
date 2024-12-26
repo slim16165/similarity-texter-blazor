@@ -3,7 +3,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace SimilarityTextComparison.Infrastructure.Services;
 
-public class Configuration : IConfiguration
+public class TextComparisonConfiguration : IConfiguration
 {
     public bool IgnoreLetterCase { get; private set; }
     public bool IgnoreNumbers { get; private set; }
@@ -13,7 +13,7 @@ public class Configuration : IConfiguration
 
     private readonly IStorageService _storage;
 
-    public Configuration(IStorageService storage)
+    public TextComparisonConfiguration(IStorageService storage)
     {
         _storage = storage ?? throw new ArgumentNullException(nameof(storage));
         Task.Run(() => InitializeAsync());

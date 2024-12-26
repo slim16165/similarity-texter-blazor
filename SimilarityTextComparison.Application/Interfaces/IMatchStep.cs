@@ -1,6 +1,6 @@
 ﻿using SimilarityTextComparison.Domain.Models.Matching;
 
-namespace SimilarityTextComparison.Application.Interfaces.Matching;
+namespace SimilarityTextComparison.Application.Interfaces;
 
 public interface IMatchStep
 {

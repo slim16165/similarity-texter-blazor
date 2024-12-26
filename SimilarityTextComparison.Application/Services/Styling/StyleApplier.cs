@@ -9,11 +9,10 @@ public class StyleApplier : IStyleApplier
 
     public List<List<MatchSegment>> ApplyStyles(List<List<MatchSegment>> matches)
     {
-        var sortedMatches = SortMatches(matches, 1);
-        int styleClassCount = 1;
+        var styleClassCount = 1;
         var uniqueMatches = new List<List<MatchSegment>>();
 
-        foreach (var match in sortedMatches)
+        foreach (var match in matches)
         {
             AssignStyleToMatch(match, uniqueMatches, ref styleClassCount);
         }
@@ -35,9 +34,7 @@ public class StyleApplier : IStyleApplier
 
         if (IsNonOverlapping(lastUniqueMatch, current))
         {
-            currentMatch[0].SetStyleClass(styleClassCount);
-            currentMatch[1].SetStyleClass(styleClassCount);
-            uniqueMatches.Add(currentMatch);
+            ApplyNewStyle(currentMatch, styleClassCount, uniqueMatches);
             styleClassCount++;
         }
         else if (CanExtendOverlap(lastUniqueMatch, current))
@@ -45,6 +42,13 @@ public class StyleApplier : IStyleApplier
             ExtendOverlapStyles(lastUniqueMatch, current);
             uniqueMatches.Add(currentMatch);
         }
+    }
+
+    private static void ApplyNewStyle(List<MatchSegment> currentMatch, int styleClassCount, List<List<MatchSegment>> uniqueMatches)
+    {
+        currentMatch[0].SetStyleClass(styleClassCount);
+        currentMatch[1].SetStyleClass(styleClassCount);
+        uniqueMatches.Add(currentMatch);
     }
 
     private static void InitializeFirstMatchStyle(List<MatchSegment> firstMatch, List<List<MatchSegment>> uniqueMatches)
@@ -83,17 +87,5 @@ public class StyleApplier : IStyleApplier
 
         // Calcola il nuovo MatchLength basato sulle posizioni begin
         currentMatch.MatchLength = currentMatch.BeginPosition - lastUniqueMatch.BeginPosition;
-    }
-
-
-    private static List<List<MatchSegment>> SortMatches(List<List<MatchSegment>> matches, int index)
-    {
-        var sorted = new List<List<MatchSegment>>(matches);
-        sorted.Sort((a, b) =>
-        {
-            int comparePos = a[index].TokenBeginPosition.CompareTo(b[index].TokenBeginPosition);
-            return comparePos != 0 ? comparePos : b[index].MatchLength.CompareTo(a[index].MatchLength);
-        });
-        return sorted;
     }
 }
