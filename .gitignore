@@ -365,3 +365,4 @@ FodyWeavers.xsd
 /ChatGPT Splitter Blazor/appsettings.local.json
 /.vscode
 /CombinedFile.cs
+*.zip

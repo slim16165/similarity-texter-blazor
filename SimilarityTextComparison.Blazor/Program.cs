@@ -49,7 +49,7 @@ builder.Services.AddScoped<IStorageService, StorageService>();
 builder.Services.AddScoped<IControllerService, TextComparisonService>();
 
 // Registrazione della configurazione
-builder.Services.AddSingleton<TextComparisonConfiguration>();
+builder.Services.AddScoped<TextComparisonConfiguration>();
 builder.Services.AddSingleton<IConfiguration>(provider => provider.GetRequiredService<TextComparisonConfiguration>());
 
 // Aggiungi Blazored LocalStorage
