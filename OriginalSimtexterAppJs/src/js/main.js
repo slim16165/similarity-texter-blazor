@@ -3,7 +3,7 @@
 'use strict';
 
 var $   = (typeof window !== "undefined" ? window['$'] : typeof global !== "undefined" ? global['$'] : null);
-var App = require("./app.js");
+var App = require("./app/app.js");
 
 // Main execution entry point
 $(window).load(function() {

@@ -1,5 +1,7 @@
 # OriginalSimtexterAppJs
 
+app.js = textCompare.js + sourceMappingURL
+
 
 # Analisi dei file JavaScript: Bundling e Relazioni
 
