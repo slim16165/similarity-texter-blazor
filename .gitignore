@@ -367,3 +367,4 @@ FodyWeavers.xsd
 /CombinedFile.cs
 *.zip
 /SimilarityTextComparison.Blazor/CombinedOutput.txt
+/CombinedOutput.txt

@@ -6,7 +6,6 @@ using SimilarityTextComparison.Application.Interfaces;
 using SimilarityTextComparison.Application.Pipeline;
 using SimilarityTextComparison.Application.Pipeline.PipelineSteps;
 using SimilarityTextComparison.Blazor;
-using SimilarityTextComparison.Blazor.Services;
 using SimilarityTextComparison.Domain.Interfaces.Matching;
 using SimilarityTextComparison.Domain.Interfaces.Styling;
 using SimilarityTextComparison.Domain.Interfaces.TextProcessing;
@@ -44,7 +43,6 @@ builder.Services.AddScoped<ITokenizer, Tokenizer>();
 
 // Registrazione dei servizi di infrastruttura
 builder.Services.AddScoped<IStorageService, StorageService>();
-builder.Services.AddScoped<IControllerService, TextComparisonService>();
 
 // Registrazione della configurazione
 builder.Services.AddScoped<TextComparisonConfiguration>();

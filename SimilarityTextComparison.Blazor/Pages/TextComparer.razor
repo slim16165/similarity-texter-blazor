@@ -1,11 +1,10 @@
 ﻿@page "/"
-@using SimilarityTextComparison.Blazor.Services
+@using SimilarityTextComparison.Application.Interfaces
 @using SimilarityTextComparison.Domain.Models.Matching
 @using SimilarityTextComparison.Domain.Models.TextPreProcessing
 @using SimilarityTextComparison.Infrastructure.Services
 @using SimilarityTextComparison.Blazor.Components.Shared
 @using SimilarityTextComparison.Blazor.Components.Domain
-@inject IControllerService ControllerService
 @inject IStorageService StorageService
 
 <h3 class="mt-4">Confronto Testi</h3>
@@ -16,110 +15,113 @@
 <!-- Mostra un messaggio di alert se presente -->
 @if (!string.IsNullOrEmpty(alertMessage))
 {
-    <AlertMessage Message="@alertMessage" AlertType="@alertType" />
+	<AlertMessage Message="@alertMessage" AlertType="@alertType" />
 }
 
 <!-- Pannello di Input -->
 <div class="row mt-4">
-    <div class="col-md-6">
-        <FileUploader Title="File 1" @bind-FileContent="FileContent1" />
-    </div>
-    <div class="col-md-6">
-        <FileUploader Title="File 2" @bind-FileContent="FileContent2" />
-    </div>
+	<div class="col-md-6">
+		<FileUploader Title="File 1" @bind-FileContent="FileContent1" />
+	</div>
+	<div class="col-md-6">
+		<FileUploader Title="File 2" @bind-FileContent="FileContent2" />
+	</div>
 </div>
 
 <!-- Input Manuale (Textarea) -->
 <div class="row mt-4">
-    <div class="col-md-6">
-        <div class="mb-3">
-            <label for="MyInputText1" class="form-label">Testo di Input 1:</label>
-            <textarea id="MyInputText1" class="form-control" @bind="MyInputText1" rows="5" placeholder="Inserisci il primo testo"></textarea>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="mb-3">
-            <label for="MyInputText2" class="form-label">Testo di Input 2:</label>
-            <textarea id="MyInputText2" class="form-control" @bind="MyInputText2" rows="5" placeholder="Inserisci il secondo testo"></textarea>
-        </div>
-    </div>
+	<div class="col-md-6">
+		<div class="mb-3">
+			<label for="MyInputText1" class="form-label">Testo di Input 1:</label>
+			<textarea id="MyInputText1" class="form-control" @bind="MyInputText1" rows="5" placeholder="Inserisci il primo testo"></textarea>
+		</div>
+	</div>
+	<div class="col-md-6">
+		<div class="mb-3">
+			<label for="MyInputText2" class="form-label">Testo di Input 2:</label>
+			<textarea id="MyInputText2" class="form-control" @bind="MyInputText2" rows="5" placeholder="Inserisci il secondo testo"></textarea>
+		</div>
+	</div>
 </div>
 
 <!-- Pulsante di Confronto -->
 <div class="text-center mt-3">
-    <button class="btn btn-primary" @onclick="CompareTexts" disabled="@isLoading">Confronta</button>
+	<button class="btn btn-primary" @onclick="CompareTexts" disabled="@isLoading">Confronta</button>
 </div>
 
 <!-- Risultati del Confronto -->
-@if (comparisonResults != null)
+@if (comparisonResults.Any())
 {
-    <h4 class="text-center mt-4">Risultati del Confronto</h4>
-    <div class="row">
-        @foreach (var resultList in comparisonResults)
-        {
-            <div class="col-md-6">
-                <ComparisonResult 
-                    Results="resultList" 
-                    MyInputText1="MyInputText1" 
-                    MyInputText2="MyInputText2" 
-                    Tokens="Tokens" />
-            </div>
-        }
-    </div>
+	<ComparisonResult Results="@comparisonResults" MyInputText1="@MyInputText1" MyInputText2="@MyInputText2" Tokens="@Tokens" />
 }
 
 @code {
-    private string MyInputText1;
-    private string MyInputText2;
-    private string FileContent1;
-    private string FileContent2;
+	private string MyInputText1;
+	private string MyInputText2;
+	private string FileContent1;
+	private string FileContent2;
 
-    private bool isLoading;
-    private string alertMessage;
-    private string alertType;
-    private List<List<MatchSegment>> comparisonResults;
-    private List<Token> Tokens;
+	private bool isLoading;
+	private string alertMessage;
+	private string alertType;
+	private List<List<MatchSegment>> comparisonResults = new();
+	private List<Token> Tokens;
 
-    // Metodo per confrontare i testi
-    private async Task CompareTexts()
-    {
-        // Controllo preliminare: almeno uno dei testi deve essere compilato
-        if ((string.IsNullOrWhiteSpace(MyInputText1) && string.IsNullOrWhiteSpace(FileContent1)) ||
-            (string.IsNullOrWhiteSpace(MyInputText2) && string.IsNullOrWhiteSpace(FileContent2)))
-        {
-            alertMessage = "Entrambi i testi devono essere compilati o caricati.";
-            alertType = "warning";
-            return;
-        }
 
-        // Avvia il caricamento
-        isLoading = true;
-        alertMessage = string.Empty;
-        comparisonResults = null;
-        Tokens = null;
+	private readonly ITextComparer _textComparer;
 
-        try
-        {
-            // Decidi quale testo usare: file o input manuale
-            string text1 = !string.IsNullOrWhiteSpace(FileContent1) ? FileContent1 : MyInputText1;
-            string text2 = !string.IsNullOrWhiteSpace(FileContent2) ? FileContent2 : MyInputText2;
+	public TextComparer(ITextComparer textComparer)
+	{
+		_textComparer = textComparer ?? throw new ArgumentNullException(nameof(textComparer));
+	}
 
-            comparisonResults = await ControllerService.CompareTextsAsync(text1, text2);
+	// Metodo per confrontare i testi
+	private async Task CompareTexts()
+	{
+		// Controllo preliminare: almeno uno dei testi deve essere compilato
+		if ((string.IsNullOrWhiteSpace(MyInputText1) && string.IsNullOrWhiteSpace(FileContent1)) ||
+			(string.IsNullOrWhiteSpace(MyInputText2) && string.IsNullOrWhiteSpace(FileContent2)))
+		{
+			alertMessage = "Entrambi i testi devono essere compilati o caricati.";
+			alertType = "warning";
+			return;
+		}
 
-            // Se necessario, popola i token. (Esempio fittizio)
-            // Tokens = SomeMethodToRetrieveTokensIfNeeded(text1, text2);
+		// Avvia il caricamento
+		isLoading = true;
+		alertMessage = string.Empty;
+		comparisonResults = null;
+		Tokens = null;
 
-            alertMessage = "Confronto completato.";
-            alertType = "info";
-        }
-        catch (Exception ex)
-        {
-            alertMessage = ex.Message;
-            alertType = "danger";
-        }
-        finally
-        {
-            isLoading = false;
-        }
-    }
+		try
+		{
+			// Decidi quale testo usare: file o input manuale
+			string text1 = !string.IsNullOrWhiteSpace(FileContent1) ? FileContent1 : MyInputText1;
+			string text2 = !string.IsNullOrWhiteSpace(FileContent2) ? FileContent2 : MyInputText2;
+
+			if (string.IsNullOrWhiteSpace(text1) || string.IsNullOrWhiteSpace(text2))
+			{
+				throw new ArgumentException("Entrambi i testi devono essere forniti e non vuoti.");
+			}
+
+			var inputTexts = new List<InputInfo>
+			{
+				new InputInfo("Source", "Text1", text1),
+				new InputInfo("Target", "Text2", text2)
+			};
+			comparisonResults = await _textComparer.CompareAsync(inputTexts);
+
+			alertMessage = "Confronto completato.";
+			alertType = "info";
+		}
+		catch (Exception ex)
+		{
+			alertMessage = ex.Message;
+			alertType = "danger";
+		}
+		finally
+		{
+			isLoading = false;
+		}
+	}
 }
