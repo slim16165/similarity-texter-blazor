@@ -7,30 +7,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimilarityTextComparison.Bl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimilarityTextComparison.Domain", "SimilarityTextComparison.Core\SimilarityTextComparison.Domain.csproj", "{4F9C7675-F788-4048-A8F2-CE69CE6561AA}"
 EndProject
-Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "OriginalJsFiles", "OriginalJsFiles\", "{605A5542-6AF3-426D-A7A1-B4E71611ACDD}"
-	ProjectSection(WebsiteProperties) = preProject
-		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.8"
-		Debug.AspNetCompiler.VirtualPath = "/localhost_62632"
-		Debug.AspNetCompiler.PhysicalPath = "OriginalJsFiles\"
-		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_62632\"
-		Debug.AspNetCompiler.Updateable = "true"
-		Debug.AspNetCompiler.ForceOverwrite = "true"
-		Debug.AspNetCompiler.FixedNames = "false"
-		Debug.AspNetCompiler.Debug = "True"
-		Release.AspNetCompiler.VirtualPath = "/localhost_62632"
-		Release.AspNetCompiler.PhysicalPath = "OriginalJsFiles\"
-		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\localhost_62632\"
-		Release.AspNetCompiler.Updateable = "true"
-		Release.AspNetCompiler.ForceOverwrite = "true"
-		Release.AspNetCompiler.FixedNames = "false"
-		Release.AspNetCompiler.Debug = "False"
-		VWDPort = "62632"
-		SlnRelativePath = "OriginalJsFiles\"
-	EndProjectSection
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimilarityTextComparison.Application", "SimilarityTextComparison.Application\SimilarityTextComparison.Application.csproj", "{5BEBCD77-DDB5-45BA-A0EE-25ADF5A5EAD4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimilarityTextComparison.Infrastructure", "SimilarityTextComparison.Infrastructure\SimilarityTextComparison.Infrastructure.csproj", "{4BFF561B-D036-4A7E-91C9-6C58C3F03995}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "OriginalSimtexterAppJs", "OriginalSimtexterAppJs\OriginalSimtexterAppJs.esproj", "{FBD6AFE0-0F7F-4D1F-8CB2-298659691214}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,10 +27,6 @@ Global
 		{4F9C7675-F788-4048-A8F2-CE69CE6561AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F9C7675-F788-4048-A8F2-CE69CE6561AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F9C7675-F788-4048-A8F2-CE69CE6561AA}.Release|Any CPU.Build.0 = Release|Any CPU
-		{605A5542-6AF3-426D-A7A1-B4E71611ACDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{605A5542-6AF3-426D-A7A1-B4E71611ACDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{605A5542-6AF3-426D-A7A1-B4E71611ACDD}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{605A5542-6AF3-426D-A7A1-B4E71611ACDD}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{5BEBCD77-DDB5-45BA-A0EE-25ADF5A5EAD4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5BEBCD77-DDB5-45BA-A0EE-25ADF5A5EAD4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5BEBCD77-DDB5-45BA-A0EE-25ADF5A5EAD4}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -58,6 +35,12 @@ Global
 		{4BFF561B-D036-4A7E-91C9-6C58C3F03995}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4BFF561B-D036-4A7E-91C9-6C58C3F03995}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4BFF561B-D036-4A7E-91C9-6C58C3F03995}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBD6AFE0-0F7F-4D1F-8CB2-298659691214}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBD6AFE0-0F7F-4D1F-8CB2-298659691214}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBD6AFE0-0F7F-4D1F-8CB2-298659691214}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{FBD6AFE0-0F7F-4D1F-8CB2-298659691214}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBD6AFE0-0F7F-4D1F-8CB2-298659691214}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBD6AFE0-0F7F-4D1F-8CB2-298659691214}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

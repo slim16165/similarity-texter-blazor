@@ -3,26 +3,13 @@
 @inject IStorageService StorageService
 
 <div class="p-3">
-    <div class="form-check mb-2">
-        <InputCheckbox id="ignoreFootnotes" class="form-check-input" @bind-Value="IgnoreFootnotes" />
-        <label class="form-check-label" for="ignoreFootnotes">Ignora Note a Piè di Pagina</label>
-    </div>
-    <div class="form-check mb-2">
-        <InputCheckbox id="ignoreLetterCase" class="form-check-input" @bind-Value="IgnoreLetterCase" />
-        <label class="form-check-label" for="ignoreLetterCase">Ignora Maiuscole/Minuscole</label>
-    </div>
-    <div class="form-check mb-2">
-        <InputCheckbox id="ignoreNumbers" class="form-check-input" @bind-Value="IgnoreNumbers" />
-        <label class="form-check-label" for="ignoreNumbers">Ignora Numeri</label>
-    </div>
-    <div class="form-check mb-2">
-        <InputCheckbox id="ignorePunctuation" class="form-check-input" @bind-Value="IgnorePunctuation" />
-        <label class="form-check-label" for="ignorePunctuation">Ignora Punteggiatura</label>
-    </div>
-    <div class="form-check mb-2">
-        <InputCheckbox id="replaceUmlaut" class="form-check-input" @bind-Value="ReplaceUmlaut" />
-        <label class="form-check-label" for="replaceUmlaut">Sostituisci Umlaut</label>
-    </div>
+    @foreach (var setting in CurrentSettings)
+    {
+        <div class="form-check mb-2">
+            <InputCheckbox id="@setting.Key" class="form-check-input" @bind-Value="@setting.Value" />
+            <label class="form-check-label" for="@setting.Key">@setting.Label</label>
+        </div>
+    }
 
     <button class="btn btn-primary mt-3 w-100" @onclick="SaveSettings">Salva Impostazioni</button>
 
@@ -35,11 +22,7 @@
 </div>
 
 @code {
-    private bool IgnoreFootnotes { get; set; }
-    private bool IgnoreLetterCase { get; set; }
-    private bool IgnoreNumbers { get; set; }
-    private bool IgnorePunctuation { get; set; }
-    private bool ReplaceUmlaut { get; set; }
+    private List<SettingOption> CurrentSettings { get; set; } = new List<SettingOption>();
 
     private bool isLoading = false;
     private string alertMessage;
@@ -47,11 +30,16 @@
 
     protected override async Task OnInitializedAsync()
     {
-        IgnoreFootnotes = await StorageService.GetItemAsync<bool>("ignoreFootnotes");
-        IgnoreLetterCase = await StorageService.GetItemAsync<bool>("ignoreLetterCase");
-        IgnoreNumbers = await StorageService.GetItemAsync<bool>("ignoreNumbers");
-        IgnorePunctuation = await StorageService.GetItemAsync<bool>("ignorePunctuation");
-        ReplaceUmlaut = await StorageService.GetItemAsync<bool>("replaceUmlaut");
+        CurrentSettings = await SettingOption.CreateSettingsAsync(StorageService,
+            new (string Key, string Label)[]
+            {
+                ("ignoreFootnotes", "Ignora Note a Piè di Pagina"),
+                ("ignoreLetterCase", "Ignora Maiuscole/Minuscole"),
+                ("ignoreNumbers", "Ignora Numeri"),
+                ("ignorePunctuation", "Ignora Punteggiatura"),
+                ("replaceUmlaut", "Sostituisci Umlaut"),
+                ("isHtmlInput", "Tratta l'Input come HTML")
+            });
     }
 
     private async Task SaveSettings()
@@ -61,11 +49,10 @@
 
         try
         {
-            await StorageService.SetItemAsync("ignoreFootnotes", IgnoreFootnotes);
-            await StorageService.SetItemAsync("ignoreLetterCase", IgnoreLetterCase);
-            await StorageService.SetItemAsync("ignoreNumbers", IgnoreNumbers);
-            await StorageService.SetItemAsync("ignorePunctuation", IgnorePunctuation);
-            await StorageService.SetItemAsync("replaceUmlaut", ReplaceUmlaut);
+            foreach (var setting in CurrentSettings)
+            {
+                await StorageService.SetItemAsync(setting.Key, setting.Value);
+            }
 
             alertMessage = "Impostazioni salvate con successo!";
             alertType = "info";
@@ -79,6 +66,33 @@
         {
             isLoading = false;
             StateHasChanged();
+        }
+    }
+
+    private class SettingOption
+    {
+        public string Key { get; set; }
+        public string Label { get; set; }
+        public bool Value { get; set; }
+
+        public SettingOption(string key, string label, bool value)
+        {
+            Key = key;
+            Label = label;
+            Value = value;
+        }
+
+        public static async Task<List<SettingOption>> CreateSettingsAsync(IStorageService storageService, (string Key, string Label)[] settings)
+        {
+            var result = new List<SettingOption>();
+
+            foreach (var (key, label) in settings)
+            {
+                var value = await storageService.GetItemAsync<bool>(key);
+                result.Add(new SettingOption(key, label, value));
+            }
+
+            return result;
         }
     }
 }
