@@ -1,18 +1,15 @@
 ﻿using SimilarityTextComparison.Application.Interfaces;
 using SimilarityTextComparison.Domain.Models.Matching;
 using SimilarityTextComparison.Domain.Models.TextPreProcessing;
-using SimilarityTextComparison.Infrastructure.Services;
 
 namespace SimilarityTextComparison.Blazor.Services;
 
 public class TextComparisonService : IControllerService
 {
-    private readonly IStorageService _storageService;
     private readonly ITextComparer _textComparer;
 
-    public TextComparisonService(IStorageService storageService, ITextComparer textComparer)
+    public TextComparisonService(ITextComparer textComparer)
     {
-        _storageService = storageService ?? throw new ArgumentNullException(nameof(storageService));
         _textComparer = textComparer ?? throw new ArgumentNullException(nameof(textComparer));
     }
 
@@ -21,7 +18,7 @@ public class TextComparisonService : IControllerService
         ValidateInputs(input1, input2);
         List<InputInfo> inputTexts = CreateInputTexts(input1, input2);
 
-        return await ExecuteComparisonAsync(inputTexts);
+        return await _textComparer.CompareAsync(inputTexts);
     }
 
     private static void ValidateInputs(string input1, string input2)
@@ -36,21 +33,8 @@ public class TextComparisonService : IControllerService
     {
         return new List<InputInfo>
         {
-            new InputInfo("Source", "File1", input1),
-            new InputInfo("Target", "File2", input2)
+            new InputInfo("Source", "Text1", input1),
+            new InputInfo("Target", "Text2", input2)
         };
-    }
-
-    private async Task<List<List<MatchSegment>>> ExecuteComparisonAsync(List<InputInfo> inputTexts)
-    {
-        try
-        {
-            return await _textComparer.CompareAsync(inputTexts);
-        }
-        catch (Exception ex)
-        {
-            // Log dell'errore se necessario
-            throw new Exception($"Errore durante il confronto: {ex.Message}", ex);
-        }
     }
 }

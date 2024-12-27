@@ -4,9 +4,9 @@ namespace SimilarityTextComparison.Application.Pipeline;
 
 public class MatchingPipeline
 {
-    private readonly IEnumerable<IMatchStep> _steps;
+    private readonly IEnumerable<IPipelineStep> _steps;
 
-    public MatchingPipeline(IEnumerable<IMatchStep> steps)
+    public MatchingPipeline(IEnumerable<IPipelineStep> steps)
     {
         _steps = steps;
     }

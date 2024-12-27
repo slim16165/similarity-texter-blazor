@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using SimilarityTextComparison.Domain.Interfaces.TextProcessing;
+using SimilarityTextComparison.Infrastructure.Services;
 
 namespace SimilarityTextComparison.Domain.Services.TextPreProcessing;
 
@@ -9,51 +10,67 @@ namespace SimilarityTextComparison.Domain.Services.TextPreProcessing;
 /// </summary>
 public class TextInputReader : ITextInputReader
 {
-    /// <summary>
-    /// Legge l'input di testo HTML e restituisce il contenuto come stringa pulita.
-    /// </summary>
-    public async Task<string> ReadTextInputAsync(string htmlInput)
+    private readonly TextComparisonConfiguration _config;
+
+    public TextInputReader(TextComparisonConfiguration config)
     {
-        var cleanedText = await Task.Run(() => CleanHtmlInput(htmlInput));
-        return cleanedText;
+        _config = config;
+    }
+
+    /// <summary>
+    /// Legge l'input di testo HTML o normale e restituisce il contenuto come stringa pulita.
+    /// </summary>
+    public async Task<string> ReadTextInputAsync(string input)
+    {
+        if (_config.IsHtmlInput)
+        {
+            return await Task.Run(() => CleanHtmlInput(input));
+        }
+        else
+        {
+            return NormalizeWhitespace(input);
+        }
     }
 
     public string CleanHtmlInput(string htmlInput)
     {
-        var div = new XElement("div", XElement.Parse(htmlInput));
-        var extractedText = ExtractTextRecursively(div);
-
-        if (string.IsNullOrWhiteSpace(extractedText))
+        try
         {
-            throw new Exception("HTML input has no valid text contents.");
-        }
+            var div = new XElement("div", XElement.Parse(htmlInput));
+            var extractedText = ExtractTextRecursively(div);
 
-        extractedText = NormalizeWhitespace(extractedText);
-        return extractedText;
+            if (string.IsNullOrWhiteSpace(extractedText))
+            {
+                // Tratta come testo normale se non c'è testo valido
+                return NormalizeWhitespace(htmlInput);
+            }
+
+            return NormalizeWhitespace(extractedText);
+        }
+        catch (Exception)
+        {
+            // Tratta come testo normale in caso di parsing fallito
+            return NormalizeWhitespace(htmlInput);
+        }
     }
 
     private static string NormalizeWhitespace(string text)
     {
-        text = Regex.Replace(text, @"\n[\t\v ]*", "\n");
-        text = Regex.Replace(text, @"\n{3,}", "\n\n");
+        text = Regex.Replace(text, @"\s+", " ").Trim();
         return text;
     }
 
-    /// <summary>
-    /// Esplora ricorsivamente i nodi figli e restituisce il contenuto di testo dell'HTML come stringa.
-    /// </summary>
     private static string ExtractTextRecursively(XElement node)
     {
         var str = string.Empty;
 
-        // Regex per controllare le lettere (equivalente di XRegExp in JS)
+        // Regex per controllare le lettere
         var letterRegex = new Regex(@"^\p{L}+$");
 
         if (IsValidNode(node.Name.LocalName) && node.HasElements)
         {
             foreach (var child in node.Nodes())
             {
-                // Se è un nodo di testo
                 if (child is XText textNode)
                 {
                     str += textNode.Value;
@@ -62,10 +79,9 @@ public class TextInputReader : ITextInputReader
                 {
                     var extractedContent = ExtractTextRecursively(childElement);
 
-                    // Aggiunge uno spazio tra nodi di testo non separati da spazi o newline
-                    if (str.Length > 0 && extractedContent.Length > 0 &&
-                        letterRegex.IsMatch(str[^1].ToString()) &&
-                        letterRegex.IsMatch(extractedContent[0].ToString()))
+                    // Aggiunge uno spazio tra nodi di testo non separati da spazi
+                    if (!string.IsNullOrEmpty(str) && !string.IsNullOrEmpty(extractedContent) &&
+                        char.IsLetter(str[^1]) && char.IsLetter(extractedContent[0]))
                     {
                         str += " ";
                     }
@@ -77,7 +93,6 @@ public class TextInputReader : ITextInputReader
 
         return str;
 
-        // Funzione per verificare se un nodo deve essere saltato
         bool IsValidNode(string nodeName)
         {
             var skipNodes = new[] { "IFRAME", "NOSCRIPT", "SCRIPT", "STYLE" };

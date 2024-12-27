@@ -2,7 +2,7 @@
 
 namespace SimilarityTextComparison.Application.Pipeline.PipelineSteps;
 
-public class MatchSegmentMergerStep : IMatchStep
+public class MatchSegmentMergerStep : IPipelineStep
 {
     private readonly IMatchSegmentMerger _segmentMerger;
 

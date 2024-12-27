@@ -26,11 +26,9 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddScoped<ITextComparer, TextComparer>();
 builder.Services.AddScoped<MatchingPipeline>();
 
-// Registrazione dei match steps
-builder.Services.AddScoped<IMatchStep, ForwardReferenceStep>();
-builder.Services.AddScoped<IMatchStep, MatcherStep>();
-builder.Services.AddScoped<IMatchStep, MatchSegmentMergerStep>();
-builder.Services.AddScoped<IMatchStep, StyleApplierStep>();
+// Registrazione degli step della pipeline
+PipelineSteps(builder);
+
 
 // Registrazione delle implementazioni delle interfacce di styling
 builder.Services.AddScoped<IMatchSegmentMerger, MatchedSegmentMerger>();
@@ -62,3 +60,13 @@ await config.InitializeAsync();
 
 // Esegui l'host
 await host.RunAsync();
+
+void PipelineSteps(WebAssemblyHostBuilder webAssemblyHostBuilder)
+{
+    webAssemblyHostBuilder.Services.AddScoped<IPipelineStep, TextCleaningStep>();
+    webAssemblyHostBuilder.Services.AddScoped<IPipelineStep, TokenizationStep>();
+    webAssemblyHostBuilder.Services.AddScoped<IPipelineStep, ForwardReferenceStep>();
+    webAssemblyHostBuilder.Services.AddScoped<IPipelineStep, MatcherStep>();
+    webAssemblyHostBuilder.Services.AddScoped<IPipelineStep, MatchSegmentMergerStep>();
+    webAssemblyHostBuilder.Services.AddScoped<IPipelineStep, StyleApplierStep>();
+}

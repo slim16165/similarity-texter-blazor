@@ -2,7 +2,7 @@
 
 namespace SimilarityTextComparison.Application.Pipeline.PipelineSteps;
 
-public class StyleApplierStep : IMatchStep
+public class StyleApplierStep : IPipelineStep
 {
     private readonly IStyleApplier _styleApplier;
 

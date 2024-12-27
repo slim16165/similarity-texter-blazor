@@ -2,7 +2,7 @@
 
 namespace SimilarityTextComparison.Application.Pipeline.PipelineSteps;
 
-public class ForwardReferenceStep : IMatchStep
+public class ForwardReferenceStep : IPipelineStep
 {
     private readonly IForwardReferenceManager _forwardReferenceManager;
 

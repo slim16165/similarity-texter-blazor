@@ -7,6 +7,7 @@ public class TextComparisonConfiguration
     public bool IgnorePunctuation { get; private set; }
     public bool ReplaceUmlaut { get; private set; }
     public int MinMatchLength { get; private set; }
+    public bool IsHtmlInput { get; private set; }
 
     private readonly IStorageService _storage;
 
@@ -22,5 +23,6 @@ public class TextComparisonConfiguration
         IgnorePunctuation = await _storage.GetItemAsync<bool>("ignorePunctuation");
         ReplaceUmlaut = await _storage.GetItemAsync<bool>("replaceUmlaut");
         MinMatchLength = await _storage.GetItemAsync<int>("minMatchLength");
+        IsHtmlInput = await _storage.GetItemAsync<bool>("isHtmlInput");
     }
 }

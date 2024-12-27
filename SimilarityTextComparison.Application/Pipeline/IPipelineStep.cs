@@ -1,6 +1,6 @@
 ﻿namespace SimilarityTextComparison.Application.Pipeline;
 
-public interface IMatchStep
+public interface IPipelineStep
 {
     Task ExecuteAsync(MatchingContext context);
 }

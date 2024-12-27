@@ -1,10 +1,8 @@
 ﻿using SimilarityTextComparison.Domain.Interfaces.Matching;
-using SimilarityTextComparison.Domain.Models.Matching;
-using SimilarityTextComparison.Domain.Models.TextPreProcessing;
 
 namespace SimilarityTextComparison.Application.Pipeline.PipelineSteps;
 
-public class MatcherStep : IMatchStep
+public class MatcherStep : IPipelineStep
 {
     private readonly IMatcher _matcher;
 
