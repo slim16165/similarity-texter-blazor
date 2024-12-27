@@ -23,7 +23,7 @@ public class Tokenizer : ITokenizer
     /// <returns>
     /// Una lista di oggetti <see cref="Token"/>. Ogni token rappresenta una parola "pulita" dal testo originale.
     /// Il token contiene:
-    /// - La parola "pulita" dopo la sostituzione di eventuali caratteri speciali (come umlauti).
+    /// - La parola "pulita" dopo la sostituzione di eventuali caratteri speciali
     /// - La posizione iniziale della parola nel testo originale.
     /// - La posizione finale della parola (calcolata internamente in base alla lunghezza della parola).
     /// Se una parola risulta vuota dopo la pulizia, non viene aggiunta alla lista.
@@ -35,7 +35,7 @@ public class Tokenizer : ITokenizer
 
         foreach (Match match in matches)
         {
-            var cleanedWord = ReplaceUmlauts(match.Value);
+            var cleanedWord = match.Value;
 
             if (!string.IsNullOrEmpty(cleanedWord))
             {
@@ -48,18 +48,5 @@ public class Tokenizer : ITokenizer
         }
 
         return tokens;
-    }
-
-    private string ReplaceUmlauts(string word)
-    {
-        if (!_config.ReplaceUmlaut) return word;
-
-        return word.Replace("ä", "ae")
-            .Replace("ö", "oe")
-            .Replace("ü", "ue")
-            .Replace("ß", "ss")
-            .Replace("Ä", "AE")
-            .Replace("Ö", "OE")
-            .Replace("Ü", "UE");
     }
 }

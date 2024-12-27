@@ -10,6 +10,8 @@ public class ProcessedText
     public string Text { get; set; }
     public TextStatistics Statistics { get; }
     public List<Token> Tokens { get; set; }
+    public int TkBeginPos { get; set; }
+    public int TkEndPos { get; set; }
 
     public ProcessedText(string text, TextStatistics statistics, List<Token> tokens)
     {

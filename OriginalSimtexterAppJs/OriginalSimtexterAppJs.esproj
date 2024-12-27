@@ -11,4 +11,10 @@
     <None Remove=".vscode\**" />
     <TypeScriptConfiguration Remove=".vscode\**" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="app.js" />
+    <None Remove="app.min.js" />
+    <None Remove="app.min.js.map" />
+    <None Remove="TextCompare.js" />
+  </ItemGroup>
 </Project>

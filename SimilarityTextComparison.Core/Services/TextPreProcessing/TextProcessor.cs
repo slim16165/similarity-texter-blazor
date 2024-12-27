@@ -23,7 +23,7 @@ public class TextProcessor : ITextProcessor
     {
         _config = config;
         // Trasforma le impostazioni di configurazione in una regex per filtrare il testo
-        _filterRegex = BuildFilterRegex();
+        _filterRegex = BuildCleanerRegex();
     }
 
     /// <summary>
@@ -35,10 +35,21 @@ public class TextProcessor : ITextProcessor
     /// <returns>Il testo pulito e normalizzato.</returns>
     public string CleanText(string text)
     {
-        // Applica i filtri regex per rimuovere i caratteri indesiderati
+        // 1) Applica i filtri regex (rimuove numeri, punteggiatura -> sostituisce con spazio)
         text = ApplyRegexFilters(text);
-        // Applica la normalizzazione del case (minuscolo) se configurato
+
+        // 2) (Opzionale) Collassa subito gli spazi, così eviti di portarti avanti un testo pieno di spazi
+        text = CollapseSpaces(text);
+
+        // 3) Normalizza il case (minuscolo) se necessario
         text = ApplyCaseNormalization(text);
+
+        // 4) Sostituzione degli umlaut (se config attivo)
+        text = ReplaceUmlautsIfNeeded(text);
+
+        // 5) Ricollassa spazi (se gli umlaut generano ulteriori spazi, in genere no, ma per sicurezza)
+        text = CollapseSpaces(text);
+
         return text;
     }
 
@@ -73,7 +84,7 @@ public class TextProcessor : ITextProcessor
     /// Una regex che filtra i caratteri definiti dalla configurazione (numeri, punteggiatura),
     /// oppure null se non è necessario alcun filtro.
     /// </returns>
-    private Regex? BuildFilterRegex()
+    private Regex? BuildCleanerRegex()
     {
         var patterns = new List<string>();
 
@@ -89,10 +100,45 @@ public class TextProcessor : ITextProcessor
             patterns.Add(@"\p{P}"); // Pattern per la punteggiatura
         }
 
+        if (_config.IgnorePunctuation)
+        {
+            // Aggiungi la classe \p{P} (punteggiatura) + \p{S} (simboli),
+            // se vuoi davvero eguagliare un certo comportamento "ignorare punteggiatura" in modo più esteso
+            patterns.Add(@"\p{P}\p{S}");
+        }
+
         // Se sono stati definiti dei pattern, creiamo una regex combinata
         var combinedPattern = string.Join("", patterns);
 
         // Restituisce una regex compilata che filtra numeri e/o punteggiatura, o null se non ci sono filtri
         return !string.IsNullOrEmpty(combinedPattern) ? new Regex($"[{combinedPattern}]", RegexOptions.Compiled) : null;
     }
+
+
+
+    private string CollapseSpaces(string text)
+    {
+        // Sostituisce una o più occorrenze di spazio bianco con un singolo spazio
+        text = Regex.Replace(text, @"\s+", " ");
+        // Taglia spazi iniziali e finali
+        return text.Trim();
+    }
+
+
+    private string ReplaceUmlautsIfNeeded(string text)
+    {
+        if (!_config.ReplaceUmlaut)
+            return text;
+
+        // Esempio di sostituzione base:
+        return text
+            .Replace("ä", "ae")
+            .Replace("ö", "oe")
+            .Replace("ü", "ue")
+            .Replace("ß", "ss")
+            .Replace("Ä", "AE")
+            .Replace("Ö", "OE")
+            .Replace("Ü", "UE");
+    }
+
 }

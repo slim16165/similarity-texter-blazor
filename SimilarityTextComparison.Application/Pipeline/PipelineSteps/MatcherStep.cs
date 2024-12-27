@@ -18,8 +18,8 @@ public class MatcherStep : IPipelineStep
             targetTextIndex: 1,
             sourceText: context.SourceText,
             targetText: context.TargetText,
-            forwardReferences: context.ForwardReferences,
-            tokens: context.SourceText.Tokens.Concat(context.TargetText.Tokens).ToList());
+            unifiedForwardReferences: context.UnifiedForwardReferences,
+            unifiedTokens: context.SourceText.Tokens.Concat(context.TargetText.Tokens).ToList());
 
         context.MatchingSegments.AddRange(matches);
         return Task.CompletedTask;

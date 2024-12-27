@@ -67,13 +67,9 @@
 	private List<List<MatchSegment>> comparisonResults = new();
 	private List<Token> Tokens;
 
+	[Inject]
+	private ITextComparer _textComparer { get; set; }
 
-	private readonly ITextComparer _textComparer;
-
-	public TextComparer(ITextComparer textComparer)
-	{
-		_textComparer = textComparer ?? throw new ArgumentNullException(nameof(textComparer));
-	}
 
 	// Metodo per confrontare i testi
 	private async Task CompareTexts()

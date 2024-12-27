@@ -1,12 +1,10 @@
 ﻿using SimilarityTextComparison.Domain.Interfaces.Matching;
+using SimilarityTextComparison.Domain.Models.Matching;
 using SimilarityTextComparison.Domain.Models.TextPreProcessing;
 using SimilarityTextComparison.Infrastructure.Services;
 
-namespace SimilarityTextComparison.Domain.Services.Matching;
 
-/// <summary>
-/// Ottimizza il processo di matching creando riferimenti avanzati (forward references) per identificare rapidamente ripetizioni di sequenze di token nel testo.
-/// </summary>
+namespace SimilarityTextComparison.Domain.Services.Matching;
 public class ForwardReferenceManager : IForwardReferenceManager
 {
     private readonly TextComparisonConfiguration _configuration;
@@ -17,28 +15,30 @@ public class ForwardReferenceManager : IForwardReferenceManager
     }
 
     /// <summary>
-    /// Crea un dizionario di riferimenti avanzati (forward references) per ottimizzare il matching.
-    /// Per ogni sequenza di token ripetuta nel testo, viene creata una forward reference che punta
-    /// alla successiva occorrenza della stessa sequenza. Questo permette di saltare rapidamente alle
-    /// ripetizioni e migliorare l'efficienza del matching.
+    /// Crea una lista globale di forward references per tutti i testi.
     /// </summary>
-    /// <param name="text">Il testo da analizzare.</param>
-    /// <returns>Un dizionario che mappa la posizione iniziale della sequenza alla posizione successiva.</returns>
-    public Dictionary<int, int> CreateForwardReferences(ProcessedText text)
+    /// <param name="allTokens">La lista globale di tutti i token.</param>
+    /// <param name="texts">La lista di tutti i testi processati.</param>
+    /// <returns>Una lista di ForwardReference che contiene i riferimenti globali.</returns>
+    public List<ForwardReference> CreateForwardReferences(List<Token> allTokens, List<ProcessedText> texts)
     {
-        var tokenSequencePositions = new Dictionary<string, int>();
-        var forwardReferences = new Dictionary<int, int>();
+        var forwardReferences = new List<ForwardReference>();
+        var mtsHashTable = new Dictionary<string, int>();
 
-        // Usa una sliding window
-        for (int i = 0; i + _configuration.MinMatchLength - 1 < text.Tokens.Count; i++)
+        foreach (var text in texts)
         {
-            string tokenSequence = GenerateTokenSequenceString(text.Tokens, i, _configuration.MinMatchLength);
-            if (tokenSequencePositions.TryGetValue(tokenSequence, out int previousPosition))
+            for (int i = text.TkBeginPos; i < text.TkEndPos; i++)
             {
-                forwardReferences[previousPosition] = i;
-            }
+                // Genera la sequenza di token
+                var tokenSequence = GenerateTokenSequenceString(allTokens, i, _configuration.MinMatchLength);
 
-            tokenSequencePositions[tokenSequence] = i;
+                if (mtsHashTable.TryGetValue(tokenSequence, out int previousPosition))
+                {
+                    forwardReferences.Add(new ForwardReference(previousPosition, i));
+                }
+
+                mtsHashTable[tokenSequence] = i;
+            }
         }
 
         return forwardReferences;
@@ -47,6 +47,10 @@ public class ForwardReferenceManager : IForwardReferenceManager
     /// <summary>
     /// Genera una stringa concatenando i testi dei token a partire da una posizione specificata.
     /// </summary>
+    /// <param name="tokens">La lista di token.</param>
+    /// <param name="startTokenIndex">L'indice del token da cui iniziare.</param>
+    /// <param name="count">Il numero di token da includere nella sequenza.</param>
+    /// <returns>La stringa concatenata dei token.</returns>
     private static string GenerateTokenSequenceString(List<Token> tokens, int startTokenIndex, int count)
     {
         return string.Concat(tokens.Skip(startTokenIndex).Take(count).Select(token => token.Text));

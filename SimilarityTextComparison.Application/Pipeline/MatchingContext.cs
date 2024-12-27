@@ -7,12 +7,12 @@ public class MatchingContext
 {
     public ProcessedText SourceText { get; set; }
     public ProcessedText TargetText { get; set; }
-    public Dictionary<int, int> ForwardReferences { get; set; }
     public List<List<MatchSegment>> MatchingSegments { get; set; }
+    public List<ForwardReference> UnifiedForwardReferences { get; set; }
 
     public MatchingContext()
     {
-        ForwardReferences = new Dictionary<int, int>();
+        UnifiedForwardReferences = new List<ForwardReference>() ;
         MatchingSegments = new List<List<MatchSegment>>();
     }
 }
