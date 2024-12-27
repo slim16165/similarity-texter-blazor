@@ -3,14 +3,17 @@
 
 @if (Results != null && Results.Any())
 {
-	<div class="card mb-3">
-		<div class="card-body">
-			<p class="card-text">
-				<strong>Testo @(Results.FirstOrDefault()?.TextIndex + 1 ?? 1):</strong>
-				@((MarkupString)GetHighlightedText(Results.FirstOrDefault(), Tokens))
-			</p>
+	@foreach (var match in Results)
+	{
+		<div class="card mb-3">
+			<div class="card-body">
+				<p class="card-text">
+					<strong>Testo @(match.TextIndex + 1):</strong>
+					@((MarkupString)GetHighlightedText(match, Tokens))
+				</p>
+			</div>
 		</div>
-	</div>
+	}
 }
 else
 {
@@ -32,19 +35,19 @@ else
 
 	private string GetHighlightedText(MatchSegment match, List<Token> tokens)
 	{
-		if (match == null)
+		if (match == null || tokens == null || tokens.Count == 0)
 			return string.Empty;
 
 		int startPos = match.GetTxtBeginPos(tokens);
 		int endPos = match.GetTxtEndPos(tokens);
-
 		string originalText = GetOriginalText(match.TextIndex);
-		if (originalText == null)
-			return string.Empty;
 
+		if (string.IsNullOrEmpty(originalText) || 
 		// Gestione degli indici per evitare errori
-		if (startPos < 0 || endPos >= originalText.Length || startPos > endPos)
-			return originalText;
+		    startPos < 0 || endPos >= originalText.Length || startPos > endPos)
+		{
+			return originalText ?? string.Empty;
+		}
 
 		string matchedText = originalText.Substring(startPos, endPos - startPos + 1);
 

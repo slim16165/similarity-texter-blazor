@@ -1,9 +1,12 @@
-﻿<p><b>@Mode.ToUpper(): </b> @FileName</p>
+﻿<p>
+	<strong>@(string.IsNullOrEmpty(Mode) ? "MODE" : Mode.ToUpper()):</strong>
+	@(string.IsNullOrEmpty(FileName) ? "N/A" : FileName)
+</p>
 
 @code {
-    [Parameter]
-    public string Mode { get; set; }
+	[Parameter]
+	public string Mode { get; set; }
 
-    [Parameter]
-    public string FileName { get; set; }
+	[Parameter]
+	public string FileName { get; set; }
 }

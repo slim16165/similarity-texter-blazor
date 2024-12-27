@@ -1,9 +1,9 @@
 ﻿@using SimilarityTextComparison.Blazor.Components.Domain
 @inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
 
 <PageTitle>Confronto Testi</PageTitle>
 
-<!-- Navbar Fissa -->
 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom fixed-top">
 	<div class="container-fluid">
 		<button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#settingsSidebar" aria-controls="settingsSidebar">
@@ -18,7 +18,6 @@
 	</div>
 </nav>
 
-<!-- Sidebar Offcanvas -->
 <div class="offcanvas offcanvas-start" tabindex="-1" id="settingsSidebar" aria-labelledby="settingsSidebarLabel">
 	<div class="offcanvas-header">
 		<h5 class="offcanvas-title" id="settingsSidebarLabel">Impostazioni</h5>
@@ -29,7 +28,6 @@
 	</div>
 </div>
 
-<!-- Pagina Principale -->
 <div class="container-fluid">
 	@Body
 </div>
@@ -37,13 +35,11 @@
 @code {
 	private void ToggleInputPanel()
 	{
-		// Implementa la logica per mostrare/nascondere il pannello di input se necessario
+		// Mostra/nascondi pannello input se necessario
 	}
 
 	private void NavigateToDocumentation()
 	{
-		// Implementa la navigazione alla documentazione o rimuovi questo pulsante se non necessario
-		// Ad esempio:
 		// NavigationManager.NavigateTo("/documentation");
 	}
 }

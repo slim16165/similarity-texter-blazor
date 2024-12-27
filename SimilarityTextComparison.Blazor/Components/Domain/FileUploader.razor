@@ -2,9 +2,14 @@
 @inject IStorageService StorageService
 
 <div class="mb-3">
-	<label class="form-label">@Title:</label>
-	<InputFile OnChange="HandleFileSelected" accept=".docx, .odt, .txt" />
+	<label class="form-label" for="fileInput">@Title:</label>
+	<InputFile id="fileInput" OnChange="HandleFileSelected" accept=".docx, .odt, .txt" />
 </div>
+
+@if (!string.IsNullOrEmpty(alertMessage))
+{
+	<AlertMessage Message="@alertMessage" AlertType="@alertType" />
+}
 
 @code {
 	[Parameter]
@@ -16,7 +21,7 @@
 	[Parameter]
 	public EventCallback<string> FileContentChanged { get; set; }
 
-	private bool isLoading = false;
+	private bool isLoading;
 	private string alertMessage;
 	private string alertType;
 
@@ -28,7 +33,8 @@
 		try
 		{
 			var file = e.File;
-			await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024); // 10 MB limit
+			// Per file .docx/.odt non serve implementare la logica
+			await using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
 			using var reader = new StreamReader(stream);
 			var content = await reader.ReadToEndAsync();
 
@@ -43,7 +49,6 @@
 		finally
 		{
 			isLoading = false;
-			StateHasChanged();
 		}
 	}
 }

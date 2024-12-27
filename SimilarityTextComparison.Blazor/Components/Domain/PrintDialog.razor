@@ -1,5 +1,6 @@
 ﻿@using SimilarityTextComparison.Blazor.Models
-@if (IsVisible)
+
+@if (IsVisible && Texts != null && Texts.Count >= 2)
 {
     <div class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
         <div class="modal-dialog">
@@ -12,16 +13,18 @@
                 </div>
                 <div class="modal-body">
                     <div class="row">
-                        <div class="col-xs-6">
+                        <div class="col-6">
                             <div class="form-group form-group-sm">
                                 <label for="input-comment-1">1: Comment for @Texts[0].InputMode</label>
-                                <textarea id="input-comment-1" class="form-control" rows="5" @bind="Comment1" placeholder="Type a comment"></textarea>
+                                <textarea id="input-comment-1" class="form-control" rows="5" @bind="Comment1"
+                                          placeholder="Type a comment"></textarea>
                             </div>
                         </div>
-                        <div class="col-xs-6">
+                        <div class="col-6">
                             <div class="form-group form-group-sm">
                                 <label for="input-comment-2">2: Comment for @Texts[1].InputMode</label>
-                                <textarea id="input-comment-2" class="form-control" rows="5" @bind="Comment2" placeholder="Type a comment"></textarea>
+                                <textarea id="input-comment-2" class="form-control" rows="5" @bind="Comment2"
+                                          placeholder="Type a comment"></textarea>
                             </div>
                         </div>
                     </div>

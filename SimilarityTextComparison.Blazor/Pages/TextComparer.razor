@@ -2,10 +2,9 @@
 @using SimilarityTextComparison.Blazor.Services
 @using SimilarityTextComparison.Domain.Models.Matching
 @using SimilarityTextComparison.Domain.Models.TextPreProcessing
-@using SimilarityTextComparison.Blazor.Components
-@using SimilarityTextComparison.Blazor.Components.Domain
 @using SimilarityTextComparison.Infrastructure.Services
 @using SimilarityTextComparison.Blazor.Components.Shared
+@using SimilarityTextComparison.Blazor.Components.Domain
 @inject IControllerService ControllerService
 @inject IStorageService StorageService
 
@@ -17,7 +16,7 @@
 <!-- Mostra un messaggio di alert se presente -->
 @if (!string.IsNullOrEmpty(alertMessage))
 {
-    <AlertMessage Message="alertMessage" AlertType="alertType" />
+    <AlertMessage Message="@alertMessage" AlertType="@alertType" />
 }
 
 <!-- Pannello di Input -->
@@ -56,11 +55,11 @@
 {
     <h4 class="text-center mt-4">Risultati del Confronto</h4>
     <div class="row">
-        @foreach (var result in comparisonResults)
+        @foreach (var resultList in comparisonResults)
         {
             <div class="col-md-6">
                 <ComparisonResult 
-                    Results="result" 
+                    Results="resultList" 
                     MyInputText1="MyInputText1" 
                     MyInputText2="MyInputText2" 
                     Tokens="Tokens" />
@@ -70,24 +69,23 @@
 }
 
 @code {
-    private string MyInputText1 { get; set; }
-    private string MyInputText2 { get; set; }
-
-    private string FileContent1 { get; set; }
-    private string FileContent2 { get; set; }
+    private string MyInputText1;
+    private string MyInputText2;
+    private string FileContent1;
+    private string FileContent2;
 
     private bool isLoading;
     private string alertMessage;
     private string alertType;
     private List<List<MatchSegment>> comparisonResults;
-    private List<Token> Tokens; // Assicurati di popolare questa lista correttamente
+    private List<Token> Tokens;
 
     // Metodo per confrontare i testi
     private async Task CompareTexts()
     {
         // Controllo preliminare: almeno uno dei testi deve essere compilato
-        if (string.IsNullOrWhiteSpace(MyInputText1) && string.IsNullOrWhiteSpace(FileContent1) ||
-            string.IsNullOrWhiteSpace(MyInputText2) && string.IsNullOrWhiteSpace(FileContent2))
+        if ((string.IsNullOrWhiteSpace(MyInputText1) && string.IsNullOrWhiteSpace(FileContent1)) ||
+            (string.IsNullOrWhiteSpace(MyInputText2) && string.IsNullOrWhiteSpace(FileContent2)))
         {
             alertMessage = "Entrambi i testi devono essere compilati o caricati.";
             alertType = "warning";
@@ -98,6 +96,7 @@
         isLoading = true;
         alertMessage = string.Empty;
         comparisonResults = null;
+        Tokens = null;
 
         try
         {
@@ -106,17 +105,20 @@
             string text2 = !string.IsNullOrWhiteSpace(FileContent2) ? FileContent2 : MyInputText2;
 
             comparisonResults = await ControllerService.CompareTextsAsync(text1, text2);
+
+            // Se necessario, popola i token. (Esempio fittizio)
+            // Tokens = SomeMethodToRetrieveTokensIfNeeded(text1, text2);
+
             alertMessage = "Confronto completato.";
             alertType = "info";
         }
         catch (Exception ex)
         {
-            alertMessage = $"Errore durante il confronto: {ex.Message}";
+            alertMessage = ex.Message;
             alertType = "danger";
         }
         finally
         {
-            // Ferma il caricamento
             isLoading = false;
         }
     }

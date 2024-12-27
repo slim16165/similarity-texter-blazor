@@ -4,32 +4,33 @@
 
 <div class="p-3">
     <div class="form-check mb-2">
-        <InputCheckbox class="form-check-input" @bind-Value="IgnoreFootnotes" />
-        <label class="form-check-label">Ignora Note a Piè di Pagina</label>
+        <InputCheckbox id="ignoreFootnotes" class="form-check-input" @bind-Value="IgnoreFootnotes" />
+        <label class="form-check-label" for="ignoreFootnotes">Ignora Note a Piè di Pagina</label>
     </div>
     <div class="form-check mb-2">
-        <InputCheckbox class="form-check-input" @bind-Value="IgnoreLetterCase" />
-        <label class="form-check-label">Ignora Maiuscole/Minuscole</label>
+        <InputCheckbox id="ignoreLetterCase" class="form-check-input" @bind-Value="IgnoreLetterCase" />
+        <label class="form-check-label" for="ignoreLetterCase">Ignora Maiuscole/Minuscole</label>
     </div>
     <div class="form-check mb-2">
-        <InputCheckbox class="form-check-input" @bind-Value="IgnoreNumbers" />
-        <label class="form-check-label">Ignora Numeri</label>
+        <InputCheckbox id="ignoreNumbers" class="form-check-input" @bind-Value="IgnoreNumbers" />
+        <label class="form-check-label" for="ignoreNumbers">Ignora Numeri</label>
     </div>
     <div class="form-check mb-2">
-        <InputCheckbox class="form-check-input" @bind-Value="IgnorePunctuation" />
-        <label class="form-check-label">Ignora Punteggiatura</label>
+        <InputCheckbox id="ignorePunctuation" class="form-check-input" @bind-Value="IgnorePunctuation" />
+        <label class="form-check-label" for="ignorePunctuation">Ignora Punteggiatura</label>
     </div>
     <div class="form-check mb-2">
-        <InputCheckbox class="form-check-input" @bind-Value="ReplaceUmlaut" />
-        <label class="form-check-label">Sostituisci Umlaut</label>
+        <InputCheckbox id="replaceUmlaut" class="form-check-input" @bind-Value="ReplaceUmlaut" />
+        <label class="form-check-label" for="replaceUmlaut">Sostituisci Umlaut</label>
     </div>
+
     <button class="btn btn-primary mt-3 w-100" @onclick="SaveSettings">Salva Impostazioni</button>
 
     <Loader IsLoading="isLoading" />
 
     @if (!string.IsNullOrEmpty(alertMessage))
     {
-        <AlertMessage Message="alertMessage" AlertType="alertType" />
+        <AlertMessage Message="@alertMessage" AlertType="@alertType" />
     }
 </div>
 

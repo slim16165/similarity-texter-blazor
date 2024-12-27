@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="CombinedOutput.txt" />
     <None Remove="SimilarityTextComparison.Blazor.csproj.Backup.tmp" />
   </ItemGroup>
 
