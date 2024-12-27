@@ -1,21 +1,19 @@
 ﻿using SimilarityTextComparison.Domain.Interfaces.Matching;
-using SimilarityTextComparison.Domain.Models.Matching;
 
-namespace SimilarityTextComparison.Application.Pipeline.PipelineSteps
+namespace SimilarityTextComparison.Application.Pipeline.PipelineSteps;
+
+public class MatchSegmentMergerStep : IMatchStep
 {
-    public class MatchSegmentMergerStep : IMatchStep
+    private readonly IMatchSegmentMerger _segmentMerger;
+
+    public MatchSegmentMergerStep(IMatchSegmentMerger segmentMerger)
     {
-        private readonly IMatchSegmentMerger _segmentMerger;
+        _segmentMerger = segmentMerger;
+    }
 
-        public MatchSegmentMergerStep(IMatchSegmentMerger segmentMerger)
-        {
-            _segmentMerger = segmentMerger;
-        }
-
-        public Task ExecuteAsync(MatchingContext context)
-        {
-            context.MatchingSegments = _segmentMerger.MergeSegments(context.MatchingSegments);
-            return Task.CompletedTask;
-        }
+    public Task ExecuteAsync(MatchingContext context)
+    {
+        context.MatchingSegments = _segmentMerger.MergeSegments(context.MatchingSegments);
+        return Task.CompletedTask;
     }
 }

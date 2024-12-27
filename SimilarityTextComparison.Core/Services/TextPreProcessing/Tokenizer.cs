@@ -11,7 +11,6 @@ namespace SimilarityTextComparison.Domain.Services.TextPreProcessing;
 public class Tokenizer : ITokenizer
 {
     private readonly TextComparisonConfiguration _config;
-    public static List<Token> GlobalTokens;
 
     public Tokenizer(TextComparisonConfiguration config)
     {
@@ -47,8 +46,6 @@ public class Tokenizer : ITokenizer
                 ));
             }
         }
-
-        GlobalTokens = tokens;
 
         return tokens;
     }

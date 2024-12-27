@@ -12,8 +12,6 @@ public class TextInputReader : ITextInputReader
     /// <summary>
     /// Legge l'input di testo HTML e restituisce il contenuto come stringa pulita.
     /// </summary>
-    /// <param name="htmlInput">L'input HTML da cui estrarre il testo.</param>
-    /// <returns>Una task che rappresenta il testo estratto e pulito.</returns>
     public async Task<string> ReadTextInputAsync(string htmlInput)
     {
         var cleanedText = await Task.Run(() => CleanHtmlInput(htmlInput));
@@ -41,12 +39,9 @@ public class TextInputReader : ITextInputReader
         return text;
     }
 
-
     /// <summary>
     /// Esplora ricorsivamente i nodi figli e restituisce il contenuto di testo dell'HTML come stringa.
     /// </summary>
-    /// <param name="node">L'elemento HTML da cui estrarre il testo.</param>
-    /// <returns>Il contenuto di testo estratto.</returns>
     private static string ExtractTextRecursively(XElement node)
     {
         var str = string.Empty;
@@ -68,7 +63,9 @@ public class TextInputReader : ITextInputReader
                     var extractedContent = ExtractTextRecursively(childElement);
 
                     // Aggiunge uno spazio tra nodi di testo non separati da spazi o newline
-                    if (letterRegex.IsMatch(str.LastOrDefault().ToString()) && letterRegex.IsMatch(extractedContent.FirstOrDefault().ToString()))
+                    if (str.Length > 0 && extractedContent.Length > 0 &&
+                        letterRegex.IsMatch(str[^1].ToString()) &&
+                        letterRegex.IsMatch(extractedContent[0].ToString()))
                     {
                         str += " ";
                     }
@@ -84,7 +81,7 @@ public class TextInputReader : ITextInputReader
         bool IsValidNode(string nodeName)
         {
             var skipNodes = new[] { "IFRAME", "NOSCRIPT", "SCRIPT", "STYLE" };
-            return !Array.Exists(skipNodes, skipNode => skipNode == nodeName);
+            return !skipNodes.Contains(nodeName, StringComparer.OrdinalIgnoreCase);
         }
     }
 }

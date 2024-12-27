@@ -1,17 +1,19 @@
-﻿using SimilarityTextComparison.Domain.Models.TextPreProcessing;
+﻿using SimilarityTextComparison.Domain.Models.Matching;
+using SimilarityTextComparison.Domain.Models.TextPreProcessing;
 
-namespace SimilarityTextComparison.Domain.Models.Matching;
-
-public class MatchingContext
+namespace SimilarityTextComparison.Application.Pipeline
 {
-    public ProcessedText SourceText { get; set; }
-    public ProcessedText TargetText { get; set; }
-    public Dictionary<int, int> ForwardReferences { get; set; }
-    public List<Token> Tokens { get; set; }
-    public List<List<MatchSegment>> MatchingSegments { get; set; }
-
-    public MatchingContext()
+    public class MatchingContext
     {
-        MatchingSegments = new List<List<MatchSegment>>();
+        public ProcessedText SourceText { get; set; }
+        public ProcessedText TargetText { get; set; }
+        public Dictionary<int, int> ForwardReferences { get; set; }
+        public List<List<MatchSegment>> MatchingSegments { get; set; }
+
+        public MatchingContext()
+        {
+            ForwardReferences = new Dictionary<int, int>();
+            MatchingSegments = new List<List<MatchSegment>>();
+        }
     }
 }

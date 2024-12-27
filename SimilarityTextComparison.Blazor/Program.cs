@@ -50,15 +50,15 @@ builder.Services.AddScoped<IControllerService, TextComparisonService>();
 
 // Registrazione della configurazione
 builder.Services.AddScoped<TextComparisonConfiguration>();
-builder.Services.AddSingleton<IConfiguration>(provider => provider.GetRequiredService<TextComparisonConfiguration>());
+
 
 // Aggiungi Blazored LocalStorage
 builder.Services.AddBlazoredLocalStorage();
 
 // Costruzione del provider e inizializzazione della configurazione
-var serviceProvider = builder.Services.BuildServiceProvider();
-var config = serviceProvider.GetRequiredService<TextComparisonConfiguration>();
+var host = builder.Build();
+var config = host.Services.GetRequiredService<TextComparisonConfiguration>();
 await config.InitializeAsync();
 
 // Esegui l'host
-await builder.Build().RunAsync();
+await host.RunAsync();

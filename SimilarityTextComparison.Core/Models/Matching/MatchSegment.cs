@@ -17,7 +17,6 @@ public class MatchSegment : PositionalEntity
         set => EndPosition = BeginPosition + value;
     }
 
-
     public string StyleClass { get; set; }
 
     public MatchSegment(int textIndex, int tokenBeginPos, int matchLength)
@@ -27,9 +26,8 @@ public class MatchSegment : PositionalEntity
         StyleClass = string.Empty;
     }
 
-
     /// <summary>
-    /// Crea il link associato al match.
+    /// Crea il link associato al match in modo sicuro.
     /// </summary>
     /// <param name="text">Il contenuto del nodo.</param>
     /// <param name="trgMatchSegment">Il match segment di destinazione.</param>
@@ -38,7 +36,8 @@ public class MatchSegment : PositionalEntity
     {
         var matchLinkId = $"{TextIndex + 1}-{TokenBeginPosition}";
         var href = $"#{trgMatchSegment.TextIndex + 1}-{trgMatchSegment.TokenBeginPosition}";
-        return $"<a id='{matchLinkId}' class='{StyleClass}' href='{href}'>{text}</a>";
+        var safeText = System.Net.WebUtility.HtmlEncode(text);
+        return $"<a id='{matchLinkId}' class='{System.Net.WebUtility.HtmlEncode(StyleClass)}' href='{System.Net.WebUtility.HtmlEncode(href)}'>{safeText}</a>";
     }
 
     /// <summary>
@@ -73,7 +72,7 @@ public class MatchSegment : PositionalEntity
     /// <summary>
     /// Imposta la classe di stile del match segment.
     /// </summary>
-    /// <param name="n">La classe di stile da applicare.</param>
+    /// <param name="styleClass">La classe di stile da applicare.</param>
     public void SetStyleClass(string styleClass)
     {
         StyleClass = styleClass;

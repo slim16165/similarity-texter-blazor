@@ -19,7 +19,6 @@ public class TextComparer : ITextComparer
         _matchingPipeline = matchingPipeline ?? throw new ArgumentNullException(nameof(matchingPipeline));
     }
 
-
     /// <summary>
     /// Confronta una lista di testi di input e restituisce i segmenti corrispondenti trovati.
     /// </summary>
@@ -34,35 +33,27 @@ public class TextComparer : ITextComparer
 
         // Preprocessa i testi di input: pulizia e tokenizzazione
         var processedTexts = new List<ProcessedText>();
-        var allTokens = new List<Token>();
 
         foreach (var inputText in inputTexts)
         {
             // Pulisce il testo
             var (processedText, tokens) = await _textPreparationService.PreProcessAndTokenizeText(inputText.Text);
             processedTexts.Add(processedText);
-            allTokens.AddRange(tokens);
         }
 
         // Crea il contesto della pipeline
         var context = new MatchingContext
         {
             SourceText = processedTexts[0],
-            TargetText = processedTexts[1],
-            Tokens = allTokens
+            TargetText = processedTexts[1]
         };
 
         // Esegue la pipeline di matching
         var matchingSegments = await _matchingPipeline.ExecuteAsync(context);
 
         // Verifica se sono stati trovati segmenti corrispondenti
-        if (matchingSegments.Count > 0)
-        {
-        }
-        else
-        {
+        if (matchingSegments.Count == 0)
             throw new InvalidOperationException("Nessuna similarità trovata.");
-        }
 
         return matchingSegments;
     }
@@ -81,14 +72,13 @@ public class TextComparer : ITextComparer
         if (string.IsNullOrWhiteSpace(text2))
             throw new ArgumentException("Il secondo testo non può essere nullo o vuoto.", nameof(text2));
 
-        var (processedText1, tokens1) = await _textPreparationService.PreProcessAndTokenizeText(text1);
-        var (processedText2, tokens2) = await _textPreparationService.PreProcessAndTokenizeText(text2);
+        var (processedText1, _) = await _textPreparationService.PreProcessAndTokenizeText(text1);
+        var (processedText2, _) = await _textPreparationService.PreProcessAndTokenizeText(text2);
 
         var context = new MatchingContext
         {
             SourceText = processedText1,
-            TargetText = processedText2,
-            Tokens = tokens1.Concat(tokens2).ToList()
+            TargetText = processedText2
         };
 
         var matchingSegments = await _matchingPipeline.ExecuteAsync(context);

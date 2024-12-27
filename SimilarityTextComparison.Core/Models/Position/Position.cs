@@ -7,7 +7,7 @@ namespace SimilarityTextComparison.Domain.Models.Position;
 /// </summary>
 public class Position : PositionalEntity
 {
-    public int TextIndex { get; private set; } // Se necessario
+    public int TextIndex { get; private set; }
 
     public Position(int beginPosition, int endPosition, PositionUnit unit, int textIndex = 0)
         : base(beginPosition, endPosition, unit)
@@ -27,6 +27,4 @@ public class Position : PositionalEntity
 
         return BeginPosition < other.EndPosition && other.BeginPosition < EndPosition;
     }
-
-    // Altri metodi specifici
 }

@@ -1,5 +1,6 @@
 ﻿using SimilarityTextComparison.Domain.Interfaces.Matching;
 using SimilarityTextComparison.Domain.Models.Matching;
+using SimilarityTextComparison.Domain.Models.TextPreProcessing;
 
 namespace SimilarityTextComparison.Application.Pipeline.PipelineSteps;
 
@@ -20,7 +21,7 @@ public class MatcherStep : IMatchStep
             sourceText: context.SourceText,
             targetText: context.TargetText,
             forwardReferences: context.ForwardReferences,
-            tokens: context.Tokens);
+            tokens: context.SourceText.Tokens.Concat(context.TargetText.Tokens).ToList());
 
         context.MatchingSegments.AddRange(matches);
         return Task.CompletedTask;

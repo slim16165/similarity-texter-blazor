@@ -2,7 +2,10 @@
 
 namespace SimilarityTextComparison.Domain.Models.Position;
 
-public class TokenPosition : Position
+/// <summary>
+/// Represents a position based on tokens.
+/// </summary>
+public class TokenPosition : PositionalEntity
 {
     public int BeginPositionInToken => BeginPosition;
     public int EndPositionInToken => EndPosition;
