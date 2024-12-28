@@ -6,7 +6,15 @@ public class TextComparisonConfiguration
     public bool IgnoreNumbers { get; private set; }
     public bool IgnorePunctuation { get; private set; }
     public bool ReplaceUmlaut { get; private set; }
-    public int MinMatchLength { get; private set; }
+
+    private int _minMatchLength;
+
+    public int MinMatchLength
+    {
+        get => _minMatchLength;
+        private set => _minMatchLength = Math.Max(value, 2);
+    }
+
     public bool IsHtmlInput { get; private set; }
 
     private readonly IStorageService _storage;

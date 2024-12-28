@@ -14,11 +14,14 @@ public class ForwardReferenceStep : IPipelineStep
 
     public Task ExecuteAsync(MatchingContext context)
     {
-        // Creazione delle forward references per il testo sorgente e target
-        if (context.SourceText is { Tokens: not null } && context.TargetText is { Tokens: not null })
+        // Usa la lista unificata e i relativi TkBeginPos / TkEndPos
+        if (context.UnifiedTokens is { Count: > 0 })
         {
-            var unifiedTokens = context.SourceText.Tokens.Concat(context.TargetText.Tokens).ToList();
-            context.UnifiedForwardReferences = _forwardReferenceManager.CreateForwardReferences(unifiedTokens, [context.SourceText, context.TargetText]);
+            var texts = new List<ProcessedText> { context.SourceText, context.TargetText };
+            context.UnifiedForwardReferences = _forwardReferenceManager.CreateForwardReferences(
+                context.UnifiedTokens,
+                texts
+            );
         }
 
         return Task.CompletedTask;

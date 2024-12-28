@@ -15,51 +15,36 @@ public class Matcher : IMatcher
         _configuration = configuration ?? throw new ArgumentNullException(nameof(configuration));
     }
 
-    /// <summary>
-    /// Trova i segmenti corrispondenti tra il testo sorgente e il testo di destinazione.
-    /// </summary>
-    /// <param name="sourceTextIndex">Indice del testo sorgente.</param>
-    /// <param name="targetTextIndex">Indice del testo di destinazione.</param>
-    /// <param name="sourceText">Il testo sorgente.</param>
-    /// <param name="targetText">Il testo di destinazione.</param>
-    /// <param name="forwardReferences">La lista globale di forward references.</param>
-    /// <param name="tokens">La lista di tutti i token.</param>
-    /// <returns>Una lista di liste di segmenti corrispondenti.</returns>
     public List<List<MatchSegment>> FindMatches(
-        int sourceTextIndex,
-        int targetTextIndex,
-        ProcessedText sourceText,
-        ProcessedText targetText,
-        List<ForwardReference> forwardReferences,
-        List<Token> tokens)
+            int sourceTextIndex,
+            int targetTextIndex,
+            ProcessedText sourceText,
+            ProcessedText targetText,
+            List<ForwardReference> forwardReferences,
+            List<Token> tokens)
     {
         var matchingSegments = new List<List<MatchSegment>>();
-        int currentPosition = sourceText.TkBeginPos; // Inizializzato alla posizione di inizio del sorgente
+        int currentPosition = sourceText.TkBeginPos;
 
-        // Continua finché ci sono abbastanza token rimanenti nel sorgente per un match di lunghezza minima
         while (IsWithinMatchRange(currentPosition, sourceText.TkEndPos))
         {
-            // Trova il miglior match a partire dalla posizione corrente
-            var bestMatch = FindBestMatch(currentPosition, forwardReferences, sourceText, targetText, tokens);
-
-            if (bestMatch.SourcePosition != null && bestMatch.TargetPosition != null)
+            var best = FindBestMatch(forwardReferences, sourceText, targetText, tokens);
+            if (best is { SourcePosition: not null, TargetPosition: not null })
             {
-                // Crea una nuova lista di MatchSegment
-                var matchSegmentPair = new List<MatchSegment>
-                {
-                    new MatchSegment(sourceTextIndex, bestMatch.SourcePosition.BeginPosition, bestMatch.SourcePosition.Length),
-                    new MatchSegment(targetTextIndex, bestMatch.TargetPosition.BeginPosition, bestMatch.TargetPosition.Length)
-                };
+                // Crea i due segmenti (sorgente e target) con indici globali
+                var matchPair = new List<MatchSegment>
+                    {
+                        new MatchSegment(sourceTextIndex, best.SourcePosition.BeginPosition, best.SourcePosition.Length),
+                        new MatchSegment(targetTextIndex, best.TargetPosition.BeginPosition, best.TargetPosition.Length)
+                    };
 
-                // Aggiungi i segmenti corrispondenti alla lista dei risultati
-                matchingSegments.Add(matchSegmentPair);
+                matchingSegments.Add(matchPair);
 
-                // Avanza la posizione corrente di lunghezza del match trovato
-                currentPosition += bestMatch.SourcePosition.Length;
+                // Avanza la posizione
+                currentPosition = best.SourcePosition.EndPosition;
             }
             else
             {
-                // Nessun match trovato, avanza di un token
                 currentPosition++;
             }
         }
@@ -67,70 +52,78 @@ public class Matcher : IMatcher
         return matchingSegments;
     }
 
-    /// <summary>
-    /// Verifica se ci sono abbastanza token rimanenti nel sorgente per cercare un match di lunghezza minima.
-    /// </summary>
-    private bool IsWithinMatchRange(int currentPosition, int endPosition)
+    private bool IsWithinMatchRange(int currentPos, int endPos)
     {
-        return currentPosition + _configuration.MinMatchLength <= endPosition;
+        return currentPos + _configuration.MinMatchLength <= endPos;
     }
 
-    /// <summary>
-    /// Trova il miglior match possibile a partire da una posizione specifica nel testo sorgente.
-    /// </summary>
     private (TokenPosition SourcePosition, TokenPosition TargetPosition) FindBestMatch(
-        int sourceTokenStartPos,
         List<ForwardReference> forwardReferences,
         ProcessedText sourceText,
         ProcessedText targetText,
         List<Token> tokens)
     {
-        // Filtra le forward references dove 'from' è nel sorgente e 'to' è nel target
-        var relevantReferences = forwardReferences.Where(fr =>
-            fr.From >= sourceText.TkBeginPos && fr.From < sourceText.TkEndPos &&
-            fr.To >= targetText.TkBeginPos && fr.To < targetText.TkEndPos
+        var relevantRefs = forwardReferences.Where(fr =>
+            fr.FromTokenPos >= sourceText.TkBeginPos && fr.FromTokenPos < sourceText.TkEndPos &&
+            fr.ToTokenPos >= targetText.TkBeginPos && fr.ToTokenPos < targetText.TkEndPos
         ).ToList();
 
-        TokenPosition bestSourcePos = null;
-        TokenPosition bestTargetPos = null;
-        int bestMatchLength = 0;
+        TokenPosition bestSrcPos = null;
+        TokenPosition bestTrgPos = null;
+        int bestLen = 0;
 
-        foreach (var fr in relevantReferences)
+        foreach (var fr in relevantRefs)
         {
-            int targetTokenPos = fr.To;
-            int matchLength = GetMatchLength(sourceTokenStartPos, targetTokenPos, tokens);
+            // Esempio di match iniziale
+            int initialLength = GetMatchLength(fr.FromTokenPos, fr.ToTokenPos, tokens);
+            if (initialLength < _configuration.MinMatchLength) continue;
 
-            if (matchLength >= _configuration.MinMatchLength && matchLength > bestMatchLength)
+            // Iniziamo con la parte comune
+            int srcPos = fr.FromTokenPos;
+            int trgPos = fr.ToTokenPos;
+            int matchLen = initialLength;
+
+            // Se la posizione da cui parti non coincide con sourceStartPos,
+            // puoi testare anche quell'allineamento. In questo esempio
+            // usiamo i forwardReferences come “ipotesi di match”.
+
+            // STEP 1: Estendi all'indietro
+            while (srcPos > sourceText.TkBeginPos && trgPos > targetText.TkBeginPos
+                   && tokens[srcPos - 1].Text == tokens[trgPos - 1].Text)
             {
-                bestMatchLength = matchLength;
-                bestSourcePos = new TokenPosition(sourceTokenStartPos, sourceTokenStartPos + matchLength);
-                bestTargetPos = new TokenPosition(targetTokenPos, targetTokenPos + matchLength);
+                srcPos--;
+                trgPos--;
+                matchLen++;
+            }
+
+            // STEP 2: Estendi in avanti
+            while (srcPos + matchLen < sourceText.TkEndPos
+                   && trgPos + matchLen < targetText.TkEndPos
+                   && tokens[srcPos + matchLen].Text == tokens[trgPos + matchLen].Text)
+            {
+                matchLen++;
+            }
+
+            if (matchLen >= _configuration.MinMatchLength && matchLen > bestLen)
+            {
+                bestLen = matchLen;
+                bestSrcPos = new TokenPosition(srcPos, srcPos + matchLen);
+                bestTrgPos = new TokenPosition(trgPos, trgPos + matchLen);
             }
         }
 
-        if (bestSourcePos != null && bestTargetPos != null)
-        {
-            return (bestSourcePos, bestTargetPos);
-        }
-
-        return default;
+        return (bestSrcPos, bestTrgPos);
     }
 
-    /// <summary>
-    /// Calcola la lunghezza del match tra il testo sorgente e il testo di destinazione a partire dalle posizioni specificate.
-    /// </summary>
-    private static int GetMatchLength(int sourceTokenStartPos, int targetTokenStartPos, List<Token> tokens)
+    private int GetMatchLength(int srcStart, int trgStart, List<Token> tokens)
     {
-        int matchLength = 0;
-
-        // Confronta i token finché corrispondono
-        while (sourceTokenStartPos + matchLength < tokens.Count &&
-               targetTokenStartPos + matchLength < tokens.Count &&
-               tokens[sourceTokenStartPos + matchLength].Text == tokens[targetTokenStartPos + matchLength].Text)
+        int length = 0;
+        while (srcStart + length < tokens.Count
+               && trgStart + length < tokens.Count
+               && tokens[srcStart + length].Text == tokens[trgStart + length].Text)
         {
-            matchLength++;
+            length++;
         }
-
-        return matchLength;
+        return length;
     }
 }

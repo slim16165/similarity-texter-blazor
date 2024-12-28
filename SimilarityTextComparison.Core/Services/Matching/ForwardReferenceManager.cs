@@ -25,24 +25,48 @@ public class ForwardReferenceManager : IForwardReferenceManager
         var forwardReferences = new List<ForwardReference>();
         var mtsHashTable = new Dictionary<string, int>();
 
-        foreach (var text in texts)
+        // Genera tutte le sequenze in anticipo
+        var allSequences = PartitionTokensIntoSequences(allTokens, _configuration.MinMatchLength);
+
+        foreach (var (sequence, seqActualPosition) in allSequences)
         {
-            for (int i = text.TkBeginPos; i < text.TkEndPos; i++)
+            int? seqPreviousPosition = GetOrCreateSequencePosition(mtsHashTable, sequence, seqActualPosition);
+
+            if (seqPreviousPosition.HasValue)
             {
-                // Genera la sequenza di token
-                var tokenSequence = GenerateTokenSequenceString(allTokens, i, _configuration.MinMatchLength);
-
-                if (mtsHashTable.TryGetValue(tokenSequence, out int previousPosition))
-                {
-                    forwardReferences.Add(new ForwardReference(previousPosition, i));
-                }
-
-                mtsHashTable[tokenSequence] = i;
+                // AddForwardReference
+                var forwardReference = new ForwardReference(seqPreviousPosition.Value, seqActualPosition, sequence);
+                forwardReferences.Add(forwardReference);
             }
         }
 
         return forwardReferences;
     }
+
+    private static int? GetOrCreateSequencePosition(
+        Dictionary<string, int> mtsHashTable,
+        string sequence,
+        int actualSequencePosition)
+    {
+        if (mtsHashTable.TryGetValue(sequence, out int prevPos))
+        {
+            mtsHashTable[sequence] = actualSequencePosition;
+            return prevPos;
+        }
+
+        mtsHashTable[sequence] = actualSequencePosition;
+        return null;
+    }
+
+
+    private IEnumerable<(string Sequence, int Position)> PartitionTokensIntoSequences(List<Token> tokens, int sequenceLength)
+    {
+        for (int i = 0; i <= tokens.Count - sequenceLength; i++)
+        {
+            yield return (GenerateTokenSequenceString(tokens, i, sequenceLength), i);
+        }
+    }
+
 
     /// <summary>
     /// Genera una stringa concatenando i testi dei token a partire da una posizione specificata.

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using SimilarityTextComparison.Application;
+using SimilarityTextComparison.Application.Infrastructure;
 using SimilarityTextComparison.Blazor;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);

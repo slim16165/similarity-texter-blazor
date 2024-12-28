@@ -14,12 +14,13 @@ public class MatcherStep : IPipelineStep
     public Task ExecuteAsync(MatchingContext context)
     {
         var matches = _matcher.FindMatches(
-            sourceTextIndex: 0,
+            sourceTextIndex: 0,       // Indici logici: 0 e 1
             targetTextIndex: 1,
             sourceText: context.SourceText,
             targetText: context.TargetText,
             unifiedForwardReferences: context.UnifiedForwardReferences,
-            unifiedTokens: context.SourceText.Tokens.Concat(context.TargetText.Tokens).ToList());
+            unifiedTokens: context.UnifiedTokens // ecco la singola lista
+        );
 
         context.MatchingSegments.AddRange(matches);
         return Task.CompletedTask;

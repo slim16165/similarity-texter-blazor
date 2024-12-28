@@ -2,12 +2,22 @@
 
 public class ForwardReference
 {
-    public int From { get; set; }
-    public int To { get; set; }
+    public int FromTokenPos { get; set; }
+    public int ToTokenPos { get; set; }
 
-    public ForwardReference(int from, int to)
+    // Sequenza di token collegata
+    public string Sequence { get; set; }
+
+    public ForwardReference(int from, int to, string sequence)
     {
-        From = from;
-        To = to;
+        FromTokenPos = from;
+        ToTokenPos = to;
+        Sequence = sequence;
+    }
+
+    // Override del metodo ToString() per una rappresentazione più chiara
+    public override string ToString()
+    {
+        return $"ForwardReference: '{Sequence}' from position {FromTokenPos} to position {ToTokenPos}";
     }
 }

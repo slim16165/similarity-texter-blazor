@@ -10,7 +10,7 @@ using SimilarityTextComparison.Domain.Services.Styling;
 using SimilarityTextComparison.Domain.Services.TextPreProcessing;
 using SimilarityTextComparison.Infrastructure.Services;
 
-namespace SimilarityTextComparison.Application;
+namespace SimilarityTextComparison.Application.Infrastructure;
 
 public static class ServiceCollectionExtensions
 {
@@ -41,7 +41,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IStorageService, StorageService>();
 
         // Registrazione della configurazione
-        services.AddScoped<TextComparisonConfiguration>(sp =>
+        services.AddScoped(sp =>
         {
             var storageService = sp.GetRequiredService<IStorageService>();
             var config = new TextComparisonConfiguration(storageService);
@@ -52,15 +52,54 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static IServiceCollection AddPipelineSteps(this IServiceCollection services)
+    public static IServiceCollection AddPipelineSteps(this IServiceCollection services)
     {
-        services.AddScoped<IPipelineStep, TextCleaningStep>();
-        services.AddScoped<IPipelineStep, TokenizationStep>();
-        services.AddScoped<IPipelineStep, ForwardReferenceStep>();
-        services.AddScoped<IPipelineStep, MatcherStep>();
-        services.AddScoped<IPipelineStep, MatchSegmentMergerStep>();
-        services.AddScoped<IPipelineStep, StyleApplierStep>();
+        // Step originali
+        services.AddScoped<TextCleaningStep>();
+        services.AddScoped<TokenizationStep>();
+        services.AddScoped<ForwardReferenceStep>();
+        services.AddScoped<MatcherStep>();
+        services.AddScoped<MatchSegmentMergerStep>();
+        services.AddScoped<StyleApplierStep>();
+
+        // Decora tutti gli step con il logging
+        services.AddScoped<IPipelineStep, LoggingPipelineStepDecorator>(provider =>
+        {
+            var inner = provider.GetRequiredService<TextCleaningStep>();
+            return new LoggingPipelineStepDecorator(inner);
+        });
+
+        services.AddScoped<IPipelineStep, LoggingPipelineStepDecorator>(provider =>
+        {
+            var inner = provider.GetRequiredService<TokenizationStep>();
+            return new LoggingPipelineStepDecorator(inner);
+        });
+
+        services.AddScoped<IPipelineStep, LoggingPipelineStepDecorator>(provider =>
+        {
+            var inner = provider.GetRequiredService<ForwardReferenceStep>();
+            return new LoggingPipelineStepDecorator(inner);
+        });
+
+        services.AddScoped<IPipelineStep, LoggingPipelineStepDecorator>(provider =>
+        {
+            var inner = provider.GetRequiredService<MatcherStep>();
+            return new LoggingPipelineStepDecorator(inner);
+        });
+
+        services.AddScoped<IPipelineStep, LoggingPipelineStepDecorator>(provider =>
+        {
+            var inner = provider.GetRequiredService<MatchSegmentMergerStep>();
+            return new LoggingPipelineStepDecorator(inner);
+        });
+
+        services.AddScoped<IPipelineStep, LoggingPipelineStepDecorator>(provider =>
+        {
+            var inner = provider.GetRequiredService<StyleApplierStep>();
+            return new LoggingPipelineStepDecorator(inner);
+        });
 
         return services;
     }
+
 }
