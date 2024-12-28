@@ -3,9 +3,8 @@ using SimilarityTextComparison.Domain.Models.Matching;
 using SimilarityTextComparison.Domain.Models.Position;
 using SimilarityTextComparison.Domain.Models.TextPreProcessing;
 using SimilarityTextComparison.Infrastructure.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+
+namespace SimilarityTextComparison.Domain.Services.Matching;
 
 public class Matcher : IMatcher
 {
