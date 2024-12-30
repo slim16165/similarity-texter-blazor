@@ -12,15 +12,31 @@ public class MatchedSegmentMerger : IMatchSegmentMerger
     /// <inheritdoc />
     public List<List<MatchSegment>> MergeSegments(List<List<MatchSegment>> matches)
     {
-        // Ordiniamo in base al secondo segment della coppia (index = 1) per coerenza
-        var sortedMatches = SortMatches(matches, 1);
-
-        var uniqueMatches = new List<List<MatchSegment>>();
-        foreach (var match in sortedMatches)
+        if (matches == null)
         {
-            AssignMatchToUniqueMatches(match, uniqueMatches);
+            Console.WriteLine("[MatchedSegmentMerger] La lista dei match è null. Ritorno subito un elenco vuoto.");
+            return new List<List<MatchSegment>>();
         }
 
+        Console.WriteLine($"[MatchedSegmentMerger] Inizio MergeSegments: {matches.Count} match(es) in ingresso.");
+
+        // Ordiniamo in base al secondo segment della coppia (index = 1) per coerenza
+        var sortedMatches = SortMatches(matches, 1);
+        Console.WriteLine($"[MatchedSegmentMerger] Eseguito sort dei match: totale={sortedMatches.Count}.");
+
+        var uniqueMatches = new List<List<MatchSegment>>();
+
+        foreach (var matchPair in sortedMatches)
+        {
+            // Log essenziale del match
+            Console.WriteLine(
+                $"[MatchedSegmentMerger] Elaboro match (S={DescribeSegment(matchPair[0])}, T={DescribeSegment(matchPair[1])})."
+            );
+
+            AssignMatchToUniqueMatches(matchPair, uniqueMatches);
+        }
+
+        Console.WriteLine($"[MatchedSegmentMerger] Merge completato. Unique matches totali: {uniqueMatches.Count}.");
         return uniqueMatches;
     }
 
@@ -43,12 +59,13 @@ public class MatchedSegmentMerger : IMatchSegmentMerger
         // Se non si sovrappone
         if (lastUniqueMatch.IsNonOverlapping(current))
         {
+            Console.WriteLine("[MatchedSegmentMerger] Nessuna sovrapposizione. Aggiungo il match ai risultati unici.");
             uniqueMatches.Add(currentMatch);
         }
         // Se c’è estensione
         else if (lastUniqueMatch.CanExtendOverlap(current))
         {
-            // Richiama un eventuale merge logico su lastUniqueMatch (o current)
+            Console.WriteLine("[MatchedSegmentMerger] Overlap con estensione. Richiamo ExtendOverlap() e aggiungo il match.");
             lastUniqueMatch.ExtendOverlap(current);
 
             // E infine aggiunge la coppia
@@ -57,6 +74,7 @@ public class MatchedSegmentMerger : IMatchSegmentMerger
         else
         {
             // Altrimenti, semplicemente aggiungi
+            Console.WriteLine("[MatchedSegmentMerger] Overlap senza estensione specifica. Aggiungo il match alla collezione unica.");
             uniqueMatches.Add(currentMatch);
         }
     }
@@ -68,6 +86,7 @@ public class MatchedSegmentMerger : IMatchSegmentMerger
         List<MatchSegment> firstMatch,
         List<List<MatchSegment>> uniqueMatches)
     {
+        Console.WriteLine("[MatchedSegmentMerger] Inizializzo il primo match (nessun match precedente).");
         uniqueMatches.Add(firstMatch);
     }
 
@@ -93,5 +112,13 @@ public class MatchedSegmentMerger : IMatchSegmentMerger
         });
 
         return sorted;
+    }
+
+    /// <summary>
+    /// Restituisce una breve descrizione testuale di un MatchSegment (per logging).
+    /// </summary>
+    private static string DescribeSegment(MatchSegment segment)
+    {
+        return $"Index={segment.TextIndex}, Begin={segment.TokenBeginPosition}, Length={segment.MatchLength}";
     }
 }

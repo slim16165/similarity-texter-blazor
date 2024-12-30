@@ -63,6 +63,12 @@ public class ForwardReferenceManager : IForwardReferenceManager
 
     private IEnumerable<(string Sequence, int Position)> PartitionTokensIntoSequences(List<Token> tokens, int sequenceLength)
     {
+        if (sequenceLength < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(sequenceLength),
+                $"Il valore di {nameof(sequenceLength)} deve essere >= 1 (valore attuale: {sequenceLength}).");
+        }
+
         for (int i = 0; i <= tokens.Count - sequenceLength; i++)
         {
             yield return (GenerateTokenSequenceString(tokens, i, sequenceLength), i);

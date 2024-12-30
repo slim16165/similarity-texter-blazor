@@ -1,6 +1,7 @@
 ﻿using SimilarityTextComparison.Domain.Models.Position;
 using SimilarityTextComparison.Domain.Models.Position.Enum;
 using SimilarityTextComparison.Domain.Models.TextPreProcessing;
+using System.Diagnostics;
 
 namespace SimilarityTextComparison.Domain.Models.Matching;
 
@@ -12,6 +13,7 @@ namespace SimilarityTextComparison.Domain.Models.Matching;
 /// - La lunghezza del match in termini di numero di token,
 /// - Una classe di stile opzionale per l'evidenziazione (<see cref="StyleClass"/>).
 /// </summary>
+[DebuggerDisplay("MatchSegment: TextIndex={TextIndex}, Begin={BeginPosition}, Length={Length}, MatchedText={MatchedText}")]
 public class MatchSegment : PositionalEntity
 {
     /// <summary>
@@ -44,6 +46,12 @@ public class MatchSegment : PositionalEntity
     /// ossia <c>TokenBeginPosition + MatchLength</c>.
     /// </summary>
     public int TokenEndPosition => TokenBeginPosition + MatchLength;
+
+    /// <summary>
+    /// Testo effettivamente matchato per questo segmento.
+    /// Utilizzata esclusivamente per scopi di debug.
+    /// </summary>
+    public string MatchedText { get; set; } = string.Empty;
 
     /// <summary>
     /// Classe di stile usata per evidenziare il match (CSS, HTML, ecc.).
@@ -200,5 +208,29 @@ public class MatchSegment : PositionalEntity
     public int GetTxtEndPos(List<Token> tokens)
     {
         return tokens[TokenBeginPosition + MatchLength - 1].EndPosition;
+    }
+
+    /// <summary>
+    /// Sovrascrive il metodo ToString per includere informazioni aggiuntive.
+    /// </summary>
+    public override string ToString()
+    {
+        return $"MatchSegment: TextIndex={TextIndex}, Begin={BeginPosition}, Length={Length}, MatchedText='{MatchedText}', StyleClass='{StyleClass}'";
+    }
+
+    /// <summary>
+    /// Recupera il testo matchato dato un elenco di token.
+    /// </summary>
+    /// <param name="tokens">Lista di token del testo originale.</param>
+    /// <returns>Stringa contenente il testo matchato.</returns>
+    public string RetrieveMatchedText(List<Token> tokens)
+    {
+        if (tokens == null)
+            throw new ArgumentNullException(nameof(tokens));
+
+        if (BeginPosition < 0 || BeginPosition + Length > tokens.Count)
+            throw new ArgumentOutOfRangeException("Le posizioni del match segment sono fuori dai limiti dei token.");
+
+        return string.Join(" ", tokens.Skip(BeginPosition).Take(Length).Select(t => t.Text));
     }
 }

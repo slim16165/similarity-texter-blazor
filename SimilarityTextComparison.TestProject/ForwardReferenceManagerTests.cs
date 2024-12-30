@@ -1,6 +1,7 @@
 using SimilarityTextComparison.Domain.Models.TextPreProcessing;
-using SimilarityTextComparison.TestProject;
 using Xunit.Abstractions;
+
+namespace SimilarityTextComparison.TestProject;
 
 /// <summary>
 /// Classe di test per ForwardReferenceManager.

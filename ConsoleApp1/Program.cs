@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using SimilarityTextComparison.Application.Infrastructure;
 using SimilarityTextComparison.Application.Pipeline;
 using SimilarityTextComparison.Domain.Models.TextPreProcessing;
 using SimilarityTextComparison.Infrastructure.Services;
-using SimilarityTextComparison.Application.Infrastructure;
+
+namespace SimilarityTextComparison.TestConsole;
 
 class Program
 {
@@ -16,13 +18,19 @@ class Program
         // Costruzione del service provider
         var serviceProvider = serviceCollection.BuildServiceProvider();
 
+        var config = serviceProvider.GetRequiredService<TextComparisonConfiguration>();
+        await config.InitializeAsync();
+
+        Console.WriteLine(config.ToString());
 
         // Risoluzione dei servizi richiesti
         var matchingPipeline = serviceProvider.GetRequiredService<MatchingPipeline>();
 
         // Testo di esempio
-        var sourceTextString = "the quick brown fox the quick; jumps over the lazy fox";
-        var targetTextString = "jumps over the lazy dog the quick";
+        //var sourceTextString = "the quick brown fox the quick; jumps over the lazy fox";
+        //var targetTextString = "jumps over the lazy dog the quick";
+        var sourceTextString = "Testo 1: La volpe marrone salta rapidamente sopra il cane pigro. Il sole splende alto nel cielo azzurro. Camminare tra gli alberi è rilassante e rigenerante. Un vecchio proverbio dice che il mattino ha l'oro in bocca.";
+        var targetTextString = "Testo 2: La volpe agile salta velocemente sopra un cane addormentato. Il sole splende alto nel cielo azzurro. Passeggiare tra le foreste è calmante e rinvigorente. Si dice spesso che il mattino porti opportunità d'oro.";
 
         // Creazione del MatchingContext con testi non preprocessati
         var context = new MatchingContext

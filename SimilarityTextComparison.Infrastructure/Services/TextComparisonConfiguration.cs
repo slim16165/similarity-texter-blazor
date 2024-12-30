@@ -3,6 +3,7 @@
 public class TextComparisonConfiguration
 {
     public bool IgnoreLetterCase { get; private set; }
+
     public bool IgnoreNumbers { get; private set; }
     public bool IgnorePunctuation { get; private set; }
     public bool ReplaceUmlaut { get; private set; }
@@ -11,7 +12,7 @@ public class TextComparisonConfiguration
 
     public int MinMatchLength
     {
-        get => _minMatchLength;
+        get => Math.Max(_minMatchLength, 2);
         private set => _minMatchLength = Math.Max(value, 2);
     }
 
@@ -32,5 +33,11 @@ public class TextComparisonConfiguration
         ReplaceUmlaut = await _storage.GetItemAsync<bool>("replaceUmlaut");
         MinMatchLength = await _storage.GetItemAsync<int>("minMatchLength");
         IsHtmlInput = await _storage.GetItemAsync<bool>("isHtmlInput");
+    }
+
+    public override string ToString()
+    {
+        return
+            $"{nameof(_minMatchLength)}: {_minMatchLength}, {nameof(_storage)}: {_storage}, {nameof(IgnoreLetterCase)}: {IgnoreLetterCase}, {nameof(IgnoreNumbers)}: {IgnoreNumbers}, {nameof(IgnorePunctuation)}: {IgnorePunctuation}, {nameof(ReplaceUmlaut)}: {ReplaceUmlaut}, {nameof(MinMatchLength)}: {MinMatchLength}, {nameof(IsHtmlInput)}: {IsHtmlInput}";
     }
 }

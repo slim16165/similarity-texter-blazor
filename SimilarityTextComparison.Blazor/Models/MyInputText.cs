@@ -6,7 +6,7 @@ public class MyInputText
     public string TabPaneId { get; private set; }
     public string Mode { get; set; }
     public bool IsHTML { get; private set; }
-    public string FileName { get; private set; }
+    public string FileName { get; set; }
     public string Text { get; set; }
     public string InputMode { get; set; }
     public int NrOfCharacters { get; set; }

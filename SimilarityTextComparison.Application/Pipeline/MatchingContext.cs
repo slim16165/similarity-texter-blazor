@@ -17,6 +17,8 @@ public class MatchingContext
     // Lista unificata di token (sorgente + target)
     public List<Token> UnifiedTokens { get; set; }
 
+    public static List<Token> UnifiedTokensStatic;
+
     public MatchingContext()
     {
         MatchingSegments = new List<List<MatchSegment>>();

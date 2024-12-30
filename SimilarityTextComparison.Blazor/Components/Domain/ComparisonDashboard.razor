@@ -1,0 +1,90 @@
+﻿@using SimilarityTextComparison.Blazor.Models
+@using SimilarityTextComparison.Domain.Models.TextPreProcessing
+@using SimilarityTextComparison.Domain.Models.Matching
+
+<div class="comparison-dashboard">
+    <!-- Titolo --> <h4>Risultati del confronto</h4>
+    <!-- 1) Sezione statistiche -->
+    <Statistics Texts="@Texts" UniqueMatches="@UniqueMatches" />
+
+    <!-- 2) Testi con highlight -->
+    <h5>Testo 1 (con evidenziazioni)</h5>
+    <ComparisonResult Results="@Results"
+                      MyInputText1="@Texts[0].Text"
+                      MyInputText2="@Texts[1].Text"
+                      Tokens="@Tokens"
+                      RenderTextIndex="0" />
+
+    <h5>Testo 2 (con evidenziazioni)</h5>
+    <ComparisonResult Results="@Results"
+                      MyInputText1="@Texts[0].Text"
+                      MyInputText2="@Texts[1].Text"
+                      Tokens="@Tokens"
+                      RenderTextIndex="1" />
+
+    <!-- 3) Pulsante “stampa” -->
+    <button class="btn btn-secondary mt-3" @onclick="ShowPrintDialog">Stampa</button>
+
+    <!-- 4) Dialog di stampa -->
+    <PrintDialog IsVisible="@showPrintDialog"
+                 OnClose="@ClosePrintDialog"
+                 OnPrint="@PrintNow"
+                 Texts="@Texts" />
+
+    <!-- 5) Se c’è da “appendere” PrintSummary su schermo nascosto, lo puoi fare qui
+            oppure crearne uno parallelo (oppure generarlo lato JS). -->
+    @if (showPrintSummary)
+    {
+        <PrintSummary Texts="@Texts"
+                      UniqueMatches="@UniqueMatches"
+                      Comment1="@Comment1"
+                      Comment2="@Comment2" />
+    }
+</div>
+@code {
+    [Parameter]
+    public List<MyInputText> Texts { get; set; }
+
+    [Parameter]
+    public List<List<MatchSegment>> Results { get; set; }
+
+    [Parameter]
+    public List<Token> Tokens { get; set; }
+
+    // Se con la pipeline calcoli i match unici, lo passi qui
+    [Parameter]
+    public int UniqueMatches { get; set; }
+
+    // Stato per la dialog di stampa
+    private bool showPrintDialog;
+    private bool showPrintSummary;
+    private string Comment1, Comment2;
+
+    private void ShowPrintDialog()
+    {
+        showPrintDialog = true;
+    }
+
+    private Task ClosePrintDialog()
+    {
+        showPrintDialog = false;
+        return Task.CompletedTask;
+    }
+
+    private Task PrintNow()
+    {
+        // L’utente ha compilato i commenti in PrintDialog
+        // (puoi passare i commenti dal PrintDialog al parent con EventCallback se preferisci)
+        // Ad esempio:
+        // Comment1 = /* recupera commento1 da PrintDialog */;
+        // Comment2 = /* recupera commento2 da PrintDialog */;
+        showPrintDialog = false;
+
+        // Visualizza se vuoi la PrintSummary
+        showPrintSummary = true;
+
+        // Possibile: chiamare JS interop per effettivamente stampare
+        // JSRuntime.InvokeVoidAsync("window.print");
+        return Task.CompletedTask;
+    }
+}
