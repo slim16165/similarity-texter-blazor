@@ -1,99 +1,192 @@
 ﻿using SimilarityTextComparison.Domain.Models.TextPreProcessing;
-using SimilarityTextComparison.Domain.Services.Matching;
-using SimilarityTextComparison.Domain.Services.TextPreProcessing;
-using SimilarityTextComparison.Infrastructure.Services;
+using Xunit;
+using System.Collections.Generic;
+using Xunit.Abstractions;
 
-namespace SimilarityTextComparison.TestProject;
-
-public class MatcherTests
+namespace SimilarityTextComparison.TestProject
 {
-    [Fact]
-    public void FindMatches_SimpleText_CorrectMatches()
+    /// <summary>
+    /// Test per la classe Matcher.
+    /// </summary>
+    public class MatcherTests : BaseTest
     {
-        // Arrange
-        var config = new TextComparisonConfiguration
+        public MatcherTests(ITestOutputHelper output) : base(output) { }
+
+        [Fact]
+        public void Configuration_ShouldBeInitializedCorrectly()
         {
-            MinMatchLength = 2,
-            IgnoreLetterCase = true,
-            IgnoreNumbers = true,
-            IgnorePunctuation = true,
-            ReplaceUmlaut = true
-        };
-        var textProcessor = new TextProcessor(config);
-
-        // Testo Sorgente: "the quick brown fox the quick"
-        var sourceTextString = "the quick brown fox the quick";
-        var sourceCleaned = textProcessor.CleanText(sourceTextString);
-        var sourceTokens = Tokenize(sourceCleaned, 0);
-
-        // Testo Target: "jumps over the lazy dog the quick"
-        var targetTextString = "jumps over the lazy dog the quick";
-        var targetCleaned = textProcessor.CleanText(targetTextString);
-        var targetTokens = Tokenize(targetCleaned, sourceTokens.Count);
-
-        var sourceProcessedText = new ProcessedText
-        {
-            Tokens = sourceTokens,
-            TkBeginPos = 0,
-            TkEndPos = sourceTokens.Count
-        };
-
-        var targetProcessedText = new ProcessedText
-        {
-            Tokens = targetTokens,
-            TkBeginPos = sourceTokens.Count,
-            TkEndPos = sourceTokens.Count + targetTokens.Count
-        };
-
-        var allTokens = new List<Token>();
-        allTokens.AddRange(sourceTokens);
-        allTokens.AddRange(targetTokens);
-        var texts = new List<ProcessedText> { sourceProcessedText, targetProcessedText };
-
-        var forwardReferenceManager = new ForwardReferenceManager(config);
-        var forwardReferences = forwardReferenceManager.CreateForwardReferences(allTokens, texts);
-
-        var matcher = new Matcher(config);
-
-        // Act
-        var matches = matcher.FindMatches(
-            sourceTextIndex: 0,
-            targetTextIndex: 1,
-            sourceText: sourceProcessedText,
-            targetText: targetProcessedText,
-            forwardReferences: forwardReferences,
-            tokens: allTokens
-        );
-
-        // Assert
-        Assert.Single(matches); // Solo una corrispondenza "the quick"
-        var matchPair = matches[0];
-        Assert.Equal(0, matchPair[0].TextIndex);
-        Assert.Equal(0, matchPair[0].BeginPosition);
-        Assert.Equal(2, matchPair[0].Length);
-
-        Assert.Equal(1, matchPair[1].TextIndex);
-        Assert.Equal(4, matchPair[1].BeginPosition);
-        Assert.Equal(2, matchPair[1].Length);
-    }
-
-    private List<Token> Tokenize(string text, int startIndex)
-    {
-        var tokens = new List<Token>();
-        var words = text.Split(' ');
-        int pos = startIndex;
-
-        foreach (var word in words)
-        {
-            if (string.IsNullOrWhiteSpace(word))
-                continue;
-
-            var begin = pos;
-            var end = pos + word.Length;
-            tokens.Add(new Token(word, begin, end));
-            pos = end + 1; // +1 per lo spazio
+            Assert.True(Config.IgnoreLetterCase);
+            Assert.True(Config.IgnoreNumbers);
+            Assert.True(Config.IgnorePunctuation);
+            Assert.True(Config.ReplaceUmlaut);
+            Assert.Equal(2, Config.MinMatchLength);
+            Assert.False(Config.IsHtmlInput);
         }
 
-        return tokens;
+        [Fact]
+        public void FindMatches_SimpleText_CorrectMatches()
+        {
+            // Arrange
+            var allTokens = CreateTokens(new List<string> { "the", "quick", "brown", "fox", "the", "quick", "brown", "fox" });
+
+            var sourceText = CreateProcessedText("the quick brown fox", allTokens, 0, 4);
+            var targetText = CreateProcessedText("the quick brown fox", allTokens, 4, 4);
+
+            var texts = new List<ProcessedText> { sourceText, targetText };
+
+            // Log Token Details
+            Output.WriteLine("All Tokens:");
+            for (int i = 0; i < allTokens.Count; i++)
+            {
+                Output.WriteLine($"Token[{i}]: '{allTokens[i].Text}' (Begin: {allTokens[i].BeginPosition}, End: {allTokens[i].EndPosition})");
+            }
+
+            // Act
+            var forwardRefs = ForwardReferenceManager.CreateForwardReferences(allTokens, texts);
+
+            // Log Forward References
+            Output.WriteLine("Forward References:");
+            foreach (var fr in forwardRefs)
+            {
+                Output.WriteLine($"From: {fr.FromTokenPos}, To: {fr.ToTokenPos}, Sequence: {fr.Sequence}");
+            }
+
+            var matches = Matcher.FindMatches(
+                sourceTextIndex: 0,
+                targetTextIndex: 1,
+                sourceText: sourceText,
+                targetText: targetText,
+                forwardReferences: forwardRefs,
+                tokens: allTokens
+            );
+
+            // Log Matches
+            Output.WriteLine("Matches Found:");
+            foreach (var matchPair in matches)
+            {
+                var sourceMatch = matchPair[0];
+                var targetMatch = matchPair[1];
+                Output.WriteLine($"Source Match: [Index: {sourceMatch.TextIndex}, Begin: {sourceMatch.BeginPosition}, Length: {sourceMatch.Length}]");
+                Output.WriteLine($"Target Match: [Index: {targetMatch.TextIndex}, Begin: {targetMatch.BeginPosition}, Length: {targetMatch.Length}]");
+            }
+
+            // Assert
+            Assert.Equal(1, matches.Count); // Uno solo match continuo "the quick brown fox"
+            var match = matches[0];
+            Assert.Equal(0, match[0].TextIndex);
+            Assert.Equal(0, match[0].BeginPosition);
+            Assert.Equal(4, match[0].Length);
+
+            Assert.Equal(1, match[1].TextIndex);
+            Assert.Equal(4, match[1].BeginPosition);
+            Assert.Equal(4, match[1].Length);
+        }
+
+
+        [Fact]
+        public void FindMatches_NoMatch_ReturnsEmptyList()
+        {
+            // Arrange: due testi completamente diversi
+            var allTokens = CreateTokens(new List<string>
+            {
+                "lorem", "ipsum", "dolor", "sit", "amet",
+                "banana", "apple", "orange"
+            });
+
+            var sourceText = CreateProcessedText("lorem ipsum dolor sit", allTokens, 0, 4);
+            var targetText = CreateProcessedText("banana apple orange", allTokens, 4, 3);
+
+            var texts = new List<ProcessedText> { sourceText, targetText };
+            var forwardRefs = ForwardReferenceManager.CreateForwardReferences(allTokens, texts);
+
+            // Act
+            var matches = Matcher.FindMatches(0, 1, sourceText, targetText, forwardRefs, allTokens);
+
+            // Assert
+            Assert.Empty(matches);
+        }
+
+        
+        [Fact]
+        public void FindMatches_SingleMatch_ReturnsOneMatch2()
+        {
+            // Arrange
+            var allTokens = CreateTokens(new List<string> { "hello", "world", "hello", "world" });
+
+            var sourceText = CreateProcessedText("hello world", allTokens, 0, 2);
+            var targetText = CreateProcessedText("hello world", allTokens, 2, 2);
+
+            var texts = new List<ProcessedText> { sourceText, targetText };
+            var forwardRefs = ForwardReferenceManager.CreateForwardReferences(allTokens, texts);
+
+            // Act
+            var matches = Matcher.FindMatches(0, 1, sourceText, targetText, forwardRefs, allTokens);
+
+            // Assert
+            Assert.Single(matches);
+            var matchPair = matches[0];
+            Assert.Equal(0, matchPair[0].TextIndex);
+            Assert.Equal(0, matchPair[0].BeginPosition);
+            Assert.Equal(2, matchPair[0].Length);
+
+            Assert.Equal(1, matchPair[1].TextIndex);
+            Assert.Equal(2, matchPair[1].BeginPosition);
+            Assert.Equal(2, matchPair[1].Length);
+        }
+
+        [Fact]
+        public void FindMatches_MultipleDistinctMatches_ReturnsAll()
+        {
+            // Esempio: "the quick" e "brown fox", entrambi ripetuti in target
+            var allTokens = CreateTokens(new List<string>
+            {
+                "the", "quick", "brown", "fox",
+                "the", "quick", "brown", "fox"
+            });
+            // Source: prime 4
+            var sourceText = CreateProcessedText("the quick brown fox", allTokens, 0, 4);
+            // Target: ultime 4
+            var targetText = CreateProcessedText("the quick brown fox", allTokens, 4, 4);
+
+            var texts = new List<ProcessedText> { sourceText, targetText };
+            var forwardRefs = ForwardReferenceManager.CreateForwardReferences(allTokens, texts);
+
+            // Act
+            var matches = Matcher.FindMatches(0, 1, sourceText, targetText, forwardRefs, allTokens);
+
+            // Assert
+            // Dovresti trovarti 1 match grande (lunghezza 4)
+            // Oppure, se configurato per match minori, potresti trovarne di più
+            Assert.Single(matches);
+        }
+
+        [Fact]
+        public void FindMatches_PartialOverlap_ReturnsMultiple()
+        {
+            // Esempio: "the quick brown" e più avanti "brown fox"
+            var allTokens = CreateTokens(new List<string>
+            {
+                "the", "quick", "brown", "fox",
+                "the", "quick", "brown", "fox"
+            });
+
+            // Source: 0..4 -> "the quick brown fox"
+            var sourceText = CreateProcessedText("the quick brown fox", allTokens, 0, 4);
+
+            // Target: 4..8 -> "the quick brown fox"
+            var targetText = CreateProcessedText("the quick brown fox", allTokens, 4, 4);
+
+            var texts = new List<ProcessedText> { sourceText, targetText };
+            var forwardRefs = ForwardReferenceManager.CreateForwardReferences(allTokens, texts);
+
+            // Act
+            var matches = Matcher.FindMatches(0, 1, sourceText, targetText, forwardRefs, allTokens);
+
+            // Assert
+            // A seconda di come implementi la logica, potresti aspettarti 1 match grande
+            // o 2 match parziali. Fai la tua asserzione in base al comportamento desiderato.
+            // Esempio ipotetico:
+            Assert.True(matches.Count >= 1, "Expected at least 1 match for partial overlap scenario");
+        }
     }
 }

@@ -1,11 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using SimilarityTextComparison.Application.Pipeline;
-using SimilarityTextComparison.Domain.Interfaces.Matching;
-using SimilarityTextComparison.Domain.Interfaces.TextProcessing;
 using SimilarityTextComparison.Domain.Models.TextPreProcessing;
-using SimilarityTextComparison.Domain.Models.Matching;
-using System.Linq;
-using System.Collections.Generic;
 using SimilarityTextComparison.Infrastructure.Services;
 using SimilarityTextComparison.Application.Infrastructure;
 
@@ -26,7 +21,7 @@ class Program
         var matchingPipeline = serviceProvider.GetRequiredService<MatchingPipeline>();
 
         // Testo di esempio
-        var sourceTextString = "the quick brown fox the quick";
+        var sourceTextString = "the quick brown fox the quick; jumps over the lazy fox";
         var targetTextString = "jumps over the lazy dog the quick";
 
         // Creazione del MatchingContext con testi non preprocessati

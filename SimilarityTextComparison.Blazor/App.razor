@@ -1,4 +1,6 @@
 ﻿@using SimilarityTextComparison.Blazor.Shared.Layout
+@using SimilarityTextComparison.Infrastructure.Services
+@inject TextComparisonConfiguration Config
 
 <Router AppAssembly="@typeof(App).Assembly">
 	<Found Context="routeData">
@@ -12,3 +14,10 @@
 		</LayoutView>
 	</NotFound>
 </Router>
+
+@code {
+	protected override async Task OnInitializedAsync()
+	{
+		await Config.InitializeAsync();
+	}
+}

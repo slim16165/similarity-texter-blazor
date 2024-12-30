@@ -3,89 +3,97 @@ using SimilarityTextComparison.Domain.Models.Matching;
 
 namespace SimilarityTextComparison.Domain.Services.Styling;
 
+/// <summary>
+/// Classe responsabile di applicare stili (classi CSS, ad esempio)
+/// ai segmenti di match, gestendo eventuali sovrapposizioni.
+/// </summary>
 public class StyleApplier : IStyleApplier
 {
+    /// <summary>
+    /// Numero di match unici a cui è stato applicato uno stile.
+    /// </summary>
     public int UniqueMatches { get; private set; }
 
+    /// <summary>
+    /// Applica stili a una lista di liste di <see cref="MatchSegment"/>,
+    /// gestendo sovrapposizioni e contatori di stile.
+    /// </summary>
+    /// <param name="matches">Lista di match, ognuno composto da coppie (o più segmenti).</param>
+    /// <returns>Una lista di match "stile-applied".</returns>
     public List<List<MatchSegment>> ApplyStyles(List<List<MatchSegment>> matches)
     {
         var styleClassCount = 1;
         var uniqueMatches = new List<List<MatchSegment>>();
 
-        foreach (var match in matches)
+        // itera su ogni coppia di match
+        foreach (var matchPair in matches)
         {
-            AssignStyleToMatch(match, uniqueMatches, ref styleClassCount);
+            AssignStyleToMatch(matchPair, uniqueMatches, ref styleClassCount);
         }
 
         UniqueMatches = uniqueMatches.Count;
         return uniqueMatches;
     }
 
-    private static void AssignStyleToMatch(List<MatchSegment> currentMatch, List<List<MatchSegment>> uniqueMatches, ref int styleClassCount)
+    /// <summary>
+    /// Metodo principale che gestisce l'applicazione dello stile a un nuovo match,
+    /// controllando se è non-sovrapposto, se può estendersi, ecc.
+    /// </summary>
+    private static void AssignStyleToMatch(
+        List<MatchSegment> currentMatch,
+        List<List<MatchSegment>> uniqueMatches,
+        ref int styleClassCount)
     {
+        // Se è il primo match, assegna e vai
         if (!uniqueMatches.Any())
         {
             InitializeFirstMatchStyle(currentMatch, uniqueMatches);
             return;
         }
 
+        // Prendiamo l'ultimo match nella lista e confrontiamo i segmenti target (index = 1)
         var lastUniqueMatch = uniqueMatches.Last()[1];
         var current = currentMatch[1];
 
-        if (IsNonOverlapping(lastUniqueMatch, current))
+        // Se non si sovrappongono, applichiamo uno stile nuovo
+        if (lastUniqueMatch.IsNonOverlapping(current))
         {
             ApplyNewStyle(currentMatch, styleClassCount, uniqueMatches);
             styleClassCount++;
         }
-        else if (CanExtendOverlap(lastUniqueMatch, current))
+        // Se si possono estendere/overlappare
+        else if (lastUniqueMatch.CanExtendOverlap(current))
         {
-            ExtendOverlapStyles(lastUniqueMatch, current);
+            // Semplice estensione dello stile di overlap
+            lastUniqueMatch.ExtendOverlapStyle(current);
+            // Aggiungiamo comunque la coppia ai match
             uniqueMatches.Add(currentMatch);
         }
     }
 
-    private static void ApplyNewStyle(List<MatchSegment> currentMatch, int styleClassCount, List<List<MatchSegment>> uniqueMatches)
+    /// <summary>
+    /// Assegna un nuovo stile ai due segmenti e aggiunge la coppia alla lista dei match unici.
+    /// </summary>
+    private static void ApplyNewStyle(
+        List<MatchSegment> currentMatch,
+        int styleClassCount,
+        List<List<MatchSegment>> uniqueMatches)
     {
         currentMatch[0].SetStyleClass(styleClassCount);
         currentMatch[1].SetStyleClass(styleClassCount);
         uniqueMatches.Add(currentMatch);
     }
 
-    private static void InitializeFirstMatchStyle(List<MatchSegment> firstMatch, List<List<MatchSegment>> uniqueMatches)
+    /// <summary>
+    /// Inizializza il primo match assegnandogli una classe di stile fissa (ad es. 0),
+    /// e lo aggiunge ai match unici.
+    /// </summary>
+    private static void InitializeFirstMatchStyle(
+        List<MatchSegment> firstMatch,
+        List<List<MatchSegment>> uniqueMatches)
     {
         firstMatch[0].SetStyleClass(0);
         firstMatch[1].SetStyleClass(0);
         uniqueMatches.Add(firstMatch);
-    }
-
-    private static bool IsNonOverlapping(MatchSegment lastUniqueMatch, MatchSegment currentMatch)
-    {
-        return lastUniqueMatch.TokenBeginPosition != currentMatch.TokenBeginPosition &&
-               lastUniqueMatch.GetTkEndPosition() - 1 < currentMatch.TokenBeginPosition;
-    }
-
-    private static bool CanExtendOverlap(MatchSegment lastUniqueMatch, MatchSegment currentMatch)
-    {
-        return lastUniqueMatch.GetTkEndPosition() < currentMatch.GetTkEndPosition();
-    }
-
-    private static void ExtendOverlapStyles(MatchSegment lastUniqueMatch, MatchSegment currentMatch)
-    {
-        if (lastUniqueMatch.Unit != currentMatch.Unit)
-        {
-            throw new InvalidOperationException("Le unità di posizione di lastUniqueMatch e currentMatch non sono coerenti.");
-        }
-
-        // Verifica se la classe di stile già contiene "overlapping"
-        var styleClass = lastUniqueMatch.StyleClass.EndsWith(" overlapping")
-            ? lastUniqueMatch.StyleClass
-            : $"{lastUniqueMatch.StyleClass} overlapping";
-
-        // Applica la nuova classe di stile a entrambi i MatchSegment
-        lastUniqueMatch.SetStyleClass(styleClass);
-        currentMatch.SetStyleClass(styleClass);
-
-        // Calcola il nuovo MatchLength basato sulle posizioni begin
-        currentMatch.MatchLength = currentMatch.BeginPosition - lastUniqueMatch.BeginPosition;
     }
 }

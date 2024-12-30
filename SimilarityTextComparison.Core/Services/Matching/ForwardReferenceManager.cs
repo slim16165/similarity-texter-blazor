@@ -37,6 +37,8 @@ public class ForwardReferenceManager : IForwardReferenceManager
                 // AddForwardReference
                 var forwardReference = new ForwardReference(seqPreviousPosition.Value, seqActualPosition, sequence);
                 forwardReferences.Add(forwardReference);
+
+                Console.WriteLine($"ForwardReference creato: SourcePos={forwardReference.From}, TargetPos={forwardReference.To}, Sequence='{forwardReference.Sequence}'");
             }
         }
 
@@ -77,6 +79,6 @@ public class ForwardReferenceManager : IForwardReferenceManager
     /// <returns>La stringa concatenata dei token.</returns>
     private static string GenerateTokenSequenceString(List<Token> tokens, int startTokenIndex, int count)
     {
-        return string.Concat(tokens.Skip(startTokenIndex).Take(count).Select(token => token.Text));
+        return string.Join(" ", tokens.Skip(startTokenIndex).Take(count).Select(token => token.Text));
     }
 }

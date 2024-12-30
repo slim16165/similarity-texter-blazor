@@ -1,5 +1,6 @@
 ﻿using Blazored.LocalStorage;
 using Microsoft.Extensions.DependencyInjection;
+using SimilarityTextComparison.Application.Interfaces;
 using SimilarityTextComparison.Application.Pipeline;
 using SimilarityTextComparison.Application.Pipeline.PipelineSteps;
 using SimilarityTextComparison.Domain.Interfaces.Matching;
@@ -24,6 +25,8 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITextProcessor, TextProcessor>();
         services.AddScoped<ITokenizer, Tokenizer>();
 
+        services.AddScoped<ITextComparer, TextComparer>();
+
         // Aggiungi questa riga per registrare IMatchSegmentMerger
         services.AddScoped<IMatchSegmentMerger, MatchedSegmentMerger>();
 
@@ -38,16 +41,18 @@ public static class ServiceCollectionExtensions
 
         // Configurazione per Storage e LocalStorage
         services.AddBlazoredLocalStorage();
-        services.AddScoped<IStorageService, StorageService>();
 
-        // Registrazione della configurazione
-        services.AddScoped(sp =>
-        {
-            var storageService = sp.GetRequiredService<IStorageService>();
-            var config = new TextComparisonConfiguration(storageService);
-            config.InitializeAsync().Wait(); // Sincronizza l'inizializzazione
-            return config;
-        });
+        //// Registrazione della configurazione
+        //services.AddScoped(sp =>
+        //{
+        //    var storageService = sp.GetRequiredService<IStorageService>();
+        //    var config = new TextComparisonConfiguration(storageService);
+        //    config.InitializeAsync(); // Sincronizza l'inizializzazione
+        //    return config;
+        //});
+        services.AddScoped<IStorageService, StorageService>();
+        services.AddScoped<TextComparisonConfiguration>();
+
 
         return services;
     }

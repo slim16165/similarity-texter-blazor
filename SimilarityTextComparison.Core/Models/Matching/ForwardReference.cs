@@ -7,6 +7,8 @@ public class ForwardReference
 
     // Sequenza di token collegata
     public string Sequence { get; set; }
+    public int From => FromTokenPos;
+    public int To => ToTokenPos;
 
     public ForwardReference(int from, int to, string sequence)
     {

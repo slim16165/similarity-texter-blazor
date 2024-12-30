@@ -13,5 +13,6 @@ builder.Services.AddSimilarityTextComparisonServices();
 
 // Costruzione del provider e inizializzazione della configurazione è già gestito nell'estensione
 
+
 // Esegui l'host
 await builder.Build().RunAsync();

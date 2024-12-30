@@ -1,5 +1,4 @@
 ﻿using SimilarityTextComparison.Domain.Interfaces.TextProcessing;
-using SimilarityTextComparison.Domain.Models.TextPreProcessing;
 
 namespace SimilarityTextComparison.Application.Pipeline.PipelineSteps;
 

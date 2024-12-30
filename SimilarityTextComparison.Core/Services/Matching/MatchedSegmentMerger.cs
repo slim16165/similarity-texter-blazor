@@ -3,13 +3,19 @@ using SimilarityTextComparison.Domain.Models.Matching;
 
 namespace SimilarityTextComparison.Domain.Services.Matching;
 
+/// <summary>
+/// Classe responsabile di unire (mergere) segmenti di match che si sovrappongono o sono duplicati,
+/// producendo una lista di match unici e ordinati.
+/// </summary>
 public class MatchedSegmentMerger : IMatchSegmentMerger
 {
+    /// <inheritdoc />
     public List<List<MatchSegment>> MergeSegments(List<List<MatchSegment>> matches)
     {
+        // Ordiniamo in base al secondo segment della coppia (index = 1) per coerenza
         var sortedMatches = SortMatches(matches, 1);
-        var uniqueMatches = new List<List<MatchSegment>>();
 
+        var uniqueMatches = new List<List<MatchSegment>>();
         foreach (var match in sortedMatches)
         {
             AssignMatchToUniqueMatches(match, uniqueMatches);
@@ -18,7 +24,12 @@ public class MatchedSegmentMerger : IMatchSegmentMerger
         return uniqueMatches;
     }
 
-    private static void AssignMatchToUniqueMatches(List<MatchSegment> currentMatch, List<List<MatchSegment>> uniqueMatches)
+    /// <summary>
+    /// Assegna un singolo match (coppia) alla collezione dei match unici, verificando la sovrapposizione.
+    /// </summary>
+    private static void AssignMatchToUniqueMatches(
+        List<MatchSegment> currentMatch,
+        List<List<MatchSegment>> uniqueMatches)
     {
         if (!uniqueMatches.Any())
         {
@@ -26,55 +37,61 @@ public class MatchedSegmentMerger : IMatchSegmentMerger
             return;
         }
 
-        var lastUniqueMatch = uniqueMatches.Last()[1];
+        var lastUniqueMatch = uniqueMatches.Last()[1]; // segment target dell'ultimo match
         var current = currentMatch[1];
 
-        if (IsNonOverlapping(lastUniqueMatch, current))
+        // Se non si sovrappone
+        if (lastUniqueMatch.IsNonOverlapping(current))
         {
             uniqueMatches.Add(currentMatch);
         }
-        else if (CanExtendOverlap(lastUniqueMatch, current))
+        // Se c’è estensione
+        else if (lastUniqueMatch.CanExtendOverlap(current))
         {
-            ExtendOverlap(lastUniqueMatch, current);
+            // Richiama un eventuale merge logico su lastUniqueMatch (o current)
+            lastUniqueMatch.ExtendOverlap(current);
+
+            // E infine aggiunge la coppia
+            uniqueMatches.Add(currentMatch);
+        }
+        else
+        {
+            // Altrimenti, semplicemente aggiungi
             uniqueMatches.Add(currentMatch);
         }
     }
 
-    private static void InitializeFirstMatch(List<MatchSegment> firstMatch, List<List<MatchSegment>> uniqueMatches)
+    /// <summary>
+    /// Aggiunge il primo match (coppia) nella lista.
+    /// </summary>
+    private static void InitializeFirstMatch(
+        List<MatchSegment> firstMatch,
+        List<List<MatchSegment>> uniqueMatches)
     {
         uniqueMatches.Add(firstMatch);
     }
 
-    private static bool IsNonOverlapping(MatchSegment lastUniqueMatch, MatchSegment currentMatch)
-    {
-        return lastUniqueMatch.TokenBeginPosition != currentMatch.TokenBeginPosition &&
-               lastUniqueMatch.GetTkEndPosition() - 1 < currentMatch.TokenBeginPosition;
-    }
-
-    private static bool CanExtendOverlap(MatchSegment lastUniqueMatch, MatchSegment currentMatch)
-    {
-        return lastUniqueMatch.GetTkEndPosition() < currentMatch.GetTkEndPosition();
-    }
-
-    private static void ExtendOverlap(MatchSegment lastUniqueMatch, MatchSegment currentMatch)
-    {
-        if (lastUniqueMatch.Unit != currentMatch.Unit)
-        {
-            throw new InvalidOperationException("Le unità di posizione di lastUniqueMatch e currentMatch non sono coerenti.");
-        }
-
-        // Logica di fusione (esempio: aggiornamento di proprietà)
-        // Puoi implementare ulteriori logiche di fusione qui se necessario.
-    }
-
-    private static List<List<MatchSegment>> SortMatches(List<List<MatchSegment>> matches, int index)
+    /// <summary>
+    /// Ordina le liste di match in base alla posizione iniziale dei segmenti 
+    /// e, in caso di parità, in base alla lunghezza (discendente).
+    /// </summary>
+    private static List<List<MatchSegment>> SortMatches(
+        List<List<MatchSegment>> matches,
+        int index)
     {
         var sorted = new List<List<MatchSegment>>(matches);
+
+        // Esempio di ordinamento: 
+        // - Prima per TokenBeginPosition crescente
+        // - Poi per MatchLength decrescente
         sorted.Sort((a, b) =>
         {
             int comparePos = a[index].TokenBeginPosition.CompareTo(b[index].TokenBeginPosition);
-            return comparePos != 0 ? comparePos : b[index].MatchLength.CompareTo(a[index].MatchLength);
+            return comparePos != 0
+                ? comparePos
+                : b[index].MatchLength.CompareTo(a[index].MatchLength);
         });
+
         return sorted;
     }
 }

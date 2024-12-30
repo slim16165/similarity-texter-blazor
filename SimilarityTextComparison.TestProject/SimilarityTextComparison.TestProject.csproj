@@ -18,6 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SimilarityTextComparison.Application\SimilarityTextComparison.Application.csproj" />
     <ProjectReference Include="..\SimilarityTextComparison.Core\SimilarityTextComparison.Domain.csproj" />
     <ProjectReference Include="..\SimilarityTextComparison.Infrastructure\SimilarityTextComparison.Infrastructure.csproj" />
   </ItemGroup>
