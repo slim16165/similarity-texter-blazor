@@ -32,18 +32,18 @@
 </div>
 
 <!--
-    Utilizzo del componente ContentEditable per i testi con evidenziazione inline
+    Utilizzo del componente ContentEditable per i testi senza highlight
 -->
 <div class="row mt-4">
     <div class="col-md-6">
-        <label>Testo 1 (inline highlight):</label>
+        <label>Testo 1:</label>
         <ContentEditable CssClass="border p-2"
                          Style="height: 150px; overflow-y: auto;"
                          Content="@plainText1"
                          ContentChanged="OnPlainText1Changed" />
     </div>
     <div class="col-md-6">
-        <label>Testo 2 (inline highlight):</label>
+        <label>Testo 2:</label>
         <ContentEditable CssClass="border p-2"
                          Style="height: 150px; overflow-y: auto;"
                          Content="@plainText2"
@@ -54,6 +54,27 @@
 <div class="text-center mt-3">
     <button class="btn btn-primary" @onclick="CompareTexts" disabled="@isLoading">Confronta (Inline)</button>
 </div>
+
+<!--
+    Mostra i risultati con highlight
+-->
+@if (matchesFound)
+{
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <label>Testo 1 (highlight):</label>
+            <div class="border p-2" style="height: 150px; overflow-y: auto;">
+                @((MarkupString)inlineText1)
+            </div>
+        </div>
+        <div class="col-md-6">
+            <label>Testo 2 (highlight):</label>
+            <div class="border p-2" style="height: 150px; overflow-y: auto;">
+                @((MarkupString)inlineText2)
+            </div>
+        </div>
+    </div>
+}
 
 @code {
     private string FileContent1;
@@ -69,6 +90,8 @@
     // Manteniamo una copia “pulita” del testo per evitare che Blazor ricicli markup
     private string plainText1 = string.Empty;
     private string plainText2 = string.Empty;
+
+    private bool matchesFound = false;
 
     // Gestione del cambio testo “a mano” (non da file)
     private void OnPlainText1Changed(string newValue)
@@ -96,6 +119,7 @@
 
         isLoading = true;
         alertMessage = string.Empty;
+        matchesFound = false;
 
         try
         {
@@ -119,6 +143,7 @@
                 // Stessa logica di "ComparisonResult", ma integrata direttamente qui
                 inlineText1 = BuildHighlightedText(text1, matches, 0);
                 inlineText2 = BuildHighlightedText(text2, matches, 1);
+                matchesFound = true;
             }
             else
             {
@@ -126,6 +151,7 @@
                 inlineText2 = $"<pre>{System.Net.WebUtility.HtmlEncode(text2)}</pre>";
                 alertMessage = "Nessuna similarità trovata.";
                 alertType = "info";
+                matchesFound = false;
                 Console.WriteLine("Nessun match trovato.");
             }
         }
@@ -133,6 +159,7 @@
         {
             alertMessage = ex.Message;
             alertType = "danger";
+            matchesFound = false;
             Console.WriteLine($"Errore durante il confronto: {ex.Message}");
         }
         finally
@@ -142,9 +169,8 @@
         }
     }
 
-
     // Funzione per convertire i match in HTML evidenziato
-    private static string BuildHighlightedText(string fullText, List<List<MatchSegment>> allMatches, int textIndex)
+    private string BuildHighlightedText(string fullText, List<List<MatchSegment>> allMatches, int textIndex)
     {
         if (string.IsNullOrEmpty(fullText)) return $"<pre>{fullText}</pre>";
 

@@ -13,9 +13,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimilarityTextComparison.In
 EndProject
 Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "OriginalSimtexterAppJs", "OriginalSimtexterAppJs\OriginalSimtexterAppJs.esproj", "{FBD6AFE0-0F7F-4D1F-8CB2-298659691214}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimilarityTextComparison.TestConsole", "ConsoleApp1\SimilarityTextComparison.TestConsole.csproj", "{F6544596-1128-4A11-9518-9E2E580B5CA8}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimilarityTextComparison.TestProject", "SimilarityTextComparison.TestProject\SimilarityTextComparison.TestProject.csproj", "{D4240BF5-EB0C-4AA8-8E0F-6BB0555AA2A3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimilarityTextComparison.TestConsole", "SimilarityTextComparison.TestConsole\SimilarityTextComparison.TestConsole.csproj", "{21D834DC-30BF-4AFB-958A-C7E215D6C26E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -45,14 +45,14 @@ Global
 		{FBD6AFE0-0F7F-4D1F-8CB2-298659691214}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FBD6AFE0-0F7F-4D1F-8CB2-298659691214}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FBD6AFE0-0F7F-4D1F-8CB2-298659691214}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{F6544596-1128-4A11-9518-9E2E580B5CA8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F6544596-1128-4A11-9518-9E2E580B5CA8}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F6544596-1128-4A11-9518-9E2E580B5CA8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F6544596-1128-4A11-9518-9E2E580B5CA8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D4240BF5-EB0C-4AA8-8E0F-6BB0555AA2A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D4240BF5-EB0C-4AA8-8E0F-6BB0555AA2A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D4240BF5-EB0C-4AA8-8E0F-6BB0555AA2A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D4240BF5-EB0C-4AA8-8E0F-6BB0555AA2A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21D834DC-30BF-4AFB-958A-C7E215D6C26E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21D834DC-30BF-4AFB-958A-C7E215D6C26E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21D834DC-30BF-4AFB-958A-C7E215D6C26E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21D834DC-30BF-4AFB-958A-C7E215D6C26E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

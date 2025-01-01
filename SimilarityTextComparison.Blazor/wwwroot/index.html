@@ -44,6 +44,7 @@
     <!-- Definizione della funzione JavaScript prima di Blazor -->
     <script>
         window.getInnerText = (element) => {
+            console.log("getInnerText chiamato");
             return element.innerText;
         };
     </script>
@@ -58,7 +59,13 @@
     <script src="_framework/blazor.webassembly.js"></script>
 
     <!-- Service Worker -->
-    <script>navigator.serviceWorker.register('service-worker.js');</script>
+    <script>
+        navigator.serviceWorker.register('service-worker.js').then(function (registration) {
+            console.log('Service Worker registered with scope:', registration.scope);
+        }).catch(function (error) {
+            console.log('Service Worker registration failed:', error);
+        });
+    </script>
     <script src="site.js"></script>
 </body>
 
