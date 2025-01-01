@@ -131,3 +131,22 @@ a, .btn-link {
 body {
     padding-top: 56px; /* Compensare la navbar fissa */
 }
+
+
+.highlight {
+    background-color: yellow;
+}
+
+.hl-0 {
+    background-color: yellow;
+}
+
+.hl-1 {
+    background-color: lightgreen;
+}
+
+.hl-2 {
+    background-color: lightblue;
+}
+
+/* Aggiungi ulteriori classi se necessario */

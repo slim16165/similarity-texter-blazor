@@ -1,18 +1,31 @@
-﻿@using SimilarityTextComparison.Domain.Models.Matching
+﻿@using SimilarityTextComparison.Blazor.Models
+@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Rendering
+@using System.Text.Encodings.Web
+@using SimilarityTextComparison.Domain.Models.Matching
 @using SimilarityTextComparison.Domain.Models.TextPreProcessing
 
 <div>
     @if (!string.IsNullOrEmpty(MyInputText1) && !string.IsNullOrEmpty(MyInputText2) && Tokens != null && Tokens.Any() && Results != null && Results.Any())
     {
-        <h5>Testo 1 (con evidenziazioni)</h5> <div>@(HighlightText(0, MyInputText1, Tokens, Results))</div>
-        <h5>Testo 2 (con evidenziazioni)</h5>
-        <div>@(HighlightText(1, MyInputText2, Tokens, Results))</div>
+        @* Il rendering dipende dal RenderTextIndex *@
+        @if (RenderTextIndex == 0)
+        {
+            <h5>Testo 1 (con evidenziazioni)</h5>
+            <div>@(RenderHighlightedText(MyInputText1, Tokens, Results, 0))</div>
+        }
+        else if (RenderTextIndex == 1)
+        {
+            <h5>Testo 2 (con evidenziazioni)</h5>
+            <div>@(RenderHighlightedText(MyInputText2, Tokens, Results, 1))</div>
+        }
     }
     else
     {
         <p>Nessun risultato da mostrare.</p>
     }
 </div>
+
 @code {
     [Parameter]
     public List<List<MatchSegment>> Results { get; set; }
@@ -27,83 +40,68 @@
     [Parameter]
     public string MyInputText2 { get; set; }
 
+    [Parameter]
+    public int RenderTextIndex { get; set; } // 0 o 1
+
     /// <summary>
-    /// Genera un MarkupString dell’intero testo con gli highlight dei match.
-    /// Implementa la stessa filosofia (semplificata) del codice JS:
-    /// - Raccoglie i segmenti per textIndex
-    /// - Li ordina
-    /// - Ricompone il testo con i tag evidenziati
+    /// Genera una stringa HTML con i match evidenziati.
     /// </summary>
-    private MarkupString HighlightText(int textIndex, string fullText,
-        List<Token> allTokens, List<List<MatchSegment>> allMatches)
+    private MarkupString RenderHighlightedText(string fullText, List<Token> allTokens, List<List<MatchSegment>> allMatches, int textIndex)
     {
         if (string.IsNullOrEmpty(fullText) || allTokens == null || allTokens.Count == 0)
             return (MarkupString)$"<pre>{fullText}</pre>";
 
-        // Prende tutti i MatchSegment relativi a questo textIndex
+        // Raccogli tutti i MatchSegment relativi a questo textIndex
         var segments = allMatches
-            // Ogni sotto-lista di solito ha [0]=MatchSegment testo sorgente, [1]=MatchSegment testo destinazione
+            // Ogni sottolista di solito ha [0]=MatchSegment testo sorgente, [1]=MatchSegment testo destinazione
             // ...oppure viceversa, a seconda di come è impostata la pipeline
             // Li “flatteniamo” e filtriamo per textIndex
             .SelectMany(subList => subList)
             .Where(ms => ms.TextIndex == textIndex)
+            .OrderBy(ms => ms.TokenBeginPosition)
+            .ThenByDescending(ms => ms.MatchLength)
             .ToList();
 
         if (!segments.Any())
-            return (MarkupString)$"<pre>{fullText}</pre>";
+            return (MarkupString)$"<pre>{System.Net.WebUtility.HtmlEncode(fullText)}</pre>";
 
-        // Ordina i segmenti per posizione di inizio (ascendente)
-        // Se la pipeline ha già gestito overlap/merge, dovrebbero essere “puliti”.
-        // Altrimenti potresti dover filtrare o tagliare le sovrapposizioni manualmente.
-        segments = segments
-            .OrderBy(m => m.TokenBeginPosition)
-            .ThenByDescending(m => m.MatchLength)
-            .ToList();
-
-        // Costruisce una stringa HTML con highlight/spans
-        // Scorriamo a “blocchi” dall’ultima fine evidenziata al nuovo inizio
-        // e poi ci inseriamo <span> con la parte matchata.
-        int currentCharIndex = 0;
         var sb = new System.Text.StringBuilder();
+        int currentPos = 0;
 
         foreach (var seg in segments)
         {
-            // ottieni le coordinate in termini di caratteri
+            // Ottieni le coordinate in termini di caratteri
             int segStart = seg.GetTxtBeginPos(allTokens);
             int segEnd = seg.GetTxtEndPos(allTokens);
 
-            // Fai un controllo di bounds
-            if (segStart < 0 || segEnd >= fullText.Length || segStart > segEnd)
+            // Controllo di bounds
+            if (segStart < 0 || segEnd > fullText.Length || segStart > segEnd)
                 continue;
 
-            // Aggiungi la parte di testo "non evidenziata" subito precedente
-            if (currentCharIndex < segStart)
+            // Aggiungi la parte di testo "non evidenziata" immediatamente precedente
+            if (currentPos < segStart)
             {
-                var normalSlice = fullText.Substring(currentCharIndex, segStart - currentCharIndex);
-                sb.Append(System.Net.WebUtility.HtmlEncode(normalSlice));
+                var normalChunk = fullText.Substring(currentPos, segStart - currentPos);
+                sb.Append(System.Net.WebUtility.HtmlEncode(normalChunk));
             }
 
-            // Aggiungi la parte evidenziata
-            var matchSlice = fullText.Substring(segStart, segEnd - segStart + 1);
-            // Se vuoi i link “incrociati” come nel JS (es. href al match corrispondente)
-            // puoi usare seg.CreateLinkNode(...), ma devi recuperare l'eventuale match "targetSegment".
-            // In forma semplice, usiamo uno <span> con classe highlight:
+            // Crea l'elemento evidenziato
+            var matchChunk = fullText.Substring(segStart, segEnd - segStart);
             sb.Append($"<span class=\"{System.Net.WebUtility.HtmlEncode(seg.StyleClass ?? "highlight")}\">");
-            sb.Append(System.Net.WebUtility.HtmlEncode(matchSlice));
+            sb.Append(System.Net.WebUtility.HtmlEncode(matchChunk));
             sb.Append("</span>");
 
-            // Aggiornamento dell’indice
-            currentCharIndex = segEnd + 1;
+            // Aggiorna l'indice corrente
+            currentPos = segEnd;
         }
 
-        // Aggiunge l’eventuale parte finale (dopo l’ultimo match)
-        if (currentCharIndex < fullText.Length)
+        // Aggiungi l'eventuale parte finale di testo dopo l'ultimo match
+        if (currentPos < fullText.Length)
         {
-            var tail = fullText.Substring(currentCharIndex);
+            var tail = fullText.Substring(currentPos);
             sb.Append(System.Net.WebUtility.HtmlEncode(tail));
         }
 
-        // Ritorna la stringa finale sotto forma di MarkupString
         return new MarkupString(sb.ToString());
     }
 }
