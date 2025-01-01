@@ -11,3 +11,4 @@
         window.location.reload(); // Ricarica la pagina per ripristinare lo stato
     }
 };
+

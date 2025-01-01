@@ -180,13 +180,19 @@ public class MatchSegment : PositionalEntity
     /// <returns>Una stringa HTML che contiene l'anchor (&lt;a&gt;) con l'ID e l'href appropriati.</returns>
     public string CreateLinkNode(string text, MatchSegment trgMatchSegment)
     {
+        if (trgMatchSegment == null)
+            trgMatchSegment = this; // fallback se non c'è un segmento corrispondente
+
         var matchLinkId = $"{TextIndex + 1}-{TokenBeginPosition}";
         var href = $"#{trgMatchSegment.TextIndex + 1}-{trgMatchSegment.TokenBeginPosition}";
         var safeText = System.Net.WebUtility.HtmlEncode(text);
+        var safeHref = System.Net.WebUtility.HtmlEncode(href);
+        var safeId = System.Net.WebUtility.HtmlEncode(matchLinkId);
+        var safeClass = System.Net.WebUtility.HtmlEncode(StyleClass);
 
-        return $"<a id='{matchLinkId}' " +
-               $"class='{System.Net.WebUtility.HtmlEncode(StyleClass)}' " +
-               $"href='{System.Net.WebUtility.HtmlEncode(href)}'>" +
+        return $"<a id='{safeId}' " +
+               $"class='{safeClass}' " +
+               $"href='{safeHref}'>" +
                $"{safeText}</a>";
     }
 

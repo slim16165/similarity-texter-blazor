@@ -1,0 +1,46 @@
+﻿@using Microsoft.JSInterop
+<div contenteditable="true"
+     @ref="DivElement"
+     @oninput="HandleInput"
+     class="@CssClass"
+     style="@Style">
+	@((MarkupString)Content)
+</div>
+
+@code {
+	[Parameter]
+	public string Content { get; set; }
+
+	[Parameter]
+	public EventCallback<string> ContentChanged { get; set; }
+
+	[Parameter]
+	public string CssClass { get; set; } = string.Empty;
+
+	[Parameter]
+	public string Style { get; set; } = string.Empty;
+
+	private ElementReference DivElement;
+
+	[Inject]
+	private IJSRuntime JSRuntime { get; set; }
+
+	private async Task HandleInput(ChangeEventArgs e)
+	{
+		try
+		{
+			// Ottieni il contenuto aggiornato del div tramite JavaScript
+			string newContent = await JSRuntime.InvokeAsync<string>("getInnerText", DivElement);
+			Content = newContent;
+			await ContentChanged.InvokeAsync(newContent);
+		}
+		catch (JSException jsEx)
+		{
+			Console.Error.WriteLine($"JavaScript error: {jsEx.Message}");
+		}
+		catch (Exception ex)
+		{
+			Console.Error.WriteLine($"Unexpected error: {ex.Message}");
+		}
+	}
+}

@@ -121,13 +121,6 @@ a, .btn-link {
     border-radius: 3px;
 }
 
-/* Sidebar */
-.sidebar {
-    /* Non necessaria ulteriori regole qui poiché utilizziamo Offcanvas di Bootstrap */
-}
-
-/* Altri stili personalizzati, se necessari */
-
 body {
     padding-top: 56px; /* Compensare la navbar fissa */
 }
@@ -149,4 +142,19 @@ body {
     background-color: lightblue;
 }
 
-/* Aggiungi ulteriori classi se necessario */
+/* Se l'app JS gestiva un overlap (class overlapping) */
+.overlapping {
+    border: 1px dashed red; /* o qualsiasi altro styling voluto */
+}
+
+/* Simile all'originale .comparison-output-container se vuoi */
+.comparison-output-container p {
+    margin-bottom: 1rem;
+}
+
+
+/* Assicurati che i link abbiano il cursore di puntatore */
+a.hl-0, a.hl-1, a.hl-2, a.overlapping {
+    cursor: pointer;
+    text-decoration: none; /* Rimuove la sottolineatura, se desiderato */
+}

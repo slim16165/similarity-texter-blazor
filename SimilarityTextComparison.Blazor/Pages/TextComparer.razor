@@ -1,19 +1,21 @@
 ﻿@page "/"
 @using SimilarityTextComparison.Application.Interfaces
+@using SimilarityTextComparison.Application.Pipeline
 @using SimilarityTextComparison.Domain.Models.Matching
 @using SimilarityTextComparison.Domain.Models.TextPreProcessing
 @using SimilarityTextComparison.Infrastructure.Services
 @using SimilarityTextComparison.Blazor.Components.Shared
 @using SimilarityTextComparison.Blazor.Components.Domain
-@using SimilarityTextComparison.Blazor.Models
+
 @inject IStorageService StorageService
+@inject ITextComparer MyTextComparer
 
-<h3 class="mt-4">Confronto Testi</h3>
+<h3 class="mt-4">Confronto Testi (Inline Highlight)</h3>
 
-<!-- Mostra il loader durante il caricamento -->
+<!-- Loader -->
 <Loader IsLoading="isLoading" />
 
-<!-- Mostra un messaggio di alert se presente -->
+<!-- Messaggio di allerta -->
 @if (!string.IsNullOrEmpty(alertMessage))
 {
     <AlertMessage Message="@alertMessage" AlertType="@alertType" />
@@ -29,137 +31,178 @@
     </div>
 </div>
 
-<!-- Input Manuale (Textarea) -->
+<!--
+    Utilizzo del componente ContentEditable per i testi con evidenziazione inline
+-->
 <div class="row mt-4">
     <div class="col-md-6">
-        <div class="mb-3">
-            <label for="MyInputText1" class="form-label">Testo di Input 1:</label>
-            <textarea id="MyInputText1" class="form-control" @bind="MyInputText1" rows="5" placeholder="Inserisci il primo testo"></textarea>
-        </div>
+        <label>Testo 1 (inline highlight):</label>
+        <ContentEditable CssClass="border p-2"
+                         Style="height: 150px; overflow-y: auto;"
+                         Content="@plainText1"
+                         ContentChanged="OnPlainText1Changed" />
     </div>
     <div class="col-md-6">
-        <div class="mb-3">
-            <label for="MyInputText2" class="form-label">Testo di Input 2:</label>
-            <textarea id="MyInputText2" class="form-control" @bind="MyInputText2" rows="5" placeholder="Inserisci il secondo testo"></textarea>
-        </div>
+        <label>Testo 2 (inline highlight):</label>
+        <ContentEditable CssClass="border p-2"
+                         Style="height: 150px; overflow-y: auto;"
+                         Content="@plainText2"
+                         ContentChanged="OnPlainText2Changed" />
     </div>
 </div>
 
-<!-- Pulsante di Confronto -->
 <div class="text-center mt-3">
-    <button class="btn btn-primary" @onclick="CompareTexts" disabled="@isLoading">Confronta</button>
+    <button class="btn btn-primary" @onclick="CompareTexts" disabled="@isLoading">Confronta (Inline)</button>
 </div>
 
-<!-- Risultati del Confronto -->
-@if (comparisonResults != null && comparisonResults.Any())
-{
-    <ComparisonDashboard Texts="@myTextModels"
-                         Tokens="@Tokens"
-                         Results="@comparisonResults"
-                         UniqueMatches="@uniqueMatchesCount" />
-}
-
 @code {
-    private string MyInputText1;
-    private string MyInputText2;
     private string FileContent1;
     private string FileContent2;
-
     private bool isLoading;
     private string alertMessage;
     private string alertType;
-    private List<List<MatchSegment>> comparisonResults = new();
-    private List<Token> Tokens;
 
-    // Conserviamo i "dati" dei 2 testi (fileName, text, stats, ecc.)
-    private List<MyInputText> myTextModels = new();
+    // Queste due variabili conterranno il markup HTML da visualizzare (highlight)
+    private string inlineText1 = string.Empty;
+    private string inlineText2 = string.Empty;
 
-    private int uniqueMatchesCount;
+    // Manteniamo una copia “pulita” del testo per evitare che Blazor ricicli markup
+    private string plainText1 = string.Empty;
+    private string plainText2 = string.Empty;
 
-    [Inject]
-    private ITextComparer _textComparer { get; set; }
+    // Gestione del cambio testo “a mano” (non da file)
+    private void OnPlainText1Changed(string newValue)
+    {
+        plainText1 = newValue;
+        Console.WriteLine($"plainText1 aggiornato: {plainText1}");
+    }
 
-    // Metodo per confrontare i testi
+    private void OnPlainText2Changed(string newValue)
+    {
+        plainText2 = newValue;
+        Console.WriteLine($"plainText2 aggiornato: {plainText2}");
+    }
+
     private async Task CompareTexts()
     {
-        // Controllo preliminare: almeno uno dei testi deve essere compilato
-        if ((string.IsNullOrWhiteSpace(MyInputText1) && string.IsNullOrWhiteSpace(FileContent1)) ||
-            (string.IsNullOrWhiteSpace(MyInputText2) && string.IsNullOrWhiteSpace(FileContent2)))
+        if ((string.IsNullOrWhiteSpace(plainText1) && string.IsNullOrWhiteSpace(FileContent1)) ||
+            (string.IsNullOrWhiteSpace(plainText2) && string.IsNullOrWhiteSpace(FileContent2)))
         {
-            alertMessage = "Entrambi i testi devono essere compilati o caricati.";
+            alertMessage = "Inserisci entrambi i testi (file o manuale) prima di confrontare.";
             alertType = "warning";
+            Console.WriteLine("Entrambi i testi sono vuoti o nulli.");
             return;
         }
 
-        // Avvia il caricamento
         isLoading = true;
         alertMessage = string.Empty;
-        comparisonResults = null;
-        Tokens = null;
-        myTextModels.Clear();
-        uniqueMatchesCount = 0;
 
         try
         {
-            // Decidi quale testo usare: file o input manuale
-            string text1 = !string.IsNullOrWhiteSpace(FileContent1) ? FileContent1 : MyInputText1;
-            string text2 = !string.IsNullOrWhiteSpace(FileContent2) ? FileContent2 : MyInputText2;
+            // Decidi quale testo finale prendere
+            string text1 = !string.IsNullOrWhiteSpace(FileContent1) ? FileContent1 : plainText1;
+            string text2 = !string.IsNullOrWhiteSpace(FileContent2) ? FileContent2 : plainText2;
 
-            if (string.IsNullOrWhiteSpace(text1) || string.IsNullOrWhiteSpace(text2))
+            Console.WriteLine($"Testo 1: {text1}");
+            Console.WriteLine($"Testo 2: {text2}");
+
+            // Esegui la pipeline di matching
+            var matches = await MyTextComparer.CompareAsync(text1, text2);
+
+            // Se abbiamo match, generiamo l'HTML highlight per ognuno
+            // e sostituiamo inline le stringhe
+            if (matches != null && matches.Any())
             {
-                throw new ArgumentException("Entrambi i testi devono essere forniti e non vuoti.");
+                Console.WriteLine($"Trovati {matches.Count} match.");
+
+                // Richiamiamo una funzione C# che crea l'HTML evidenziato
+                // Stessa logica di "ComparisonResult", ma integrata direttamente qui
+                inlineText1 = BuildHighlightedText(text1, matches, 0);
+                inlineText2 = BuildHighlightedText(text2, matches, 1);
             }
-
-            // Esegui il confronto
-            var inputTexts = new List<InputInfo>
+            else
             {
-                new InputInfo("Source", "Text1", text1),
-                new InputInfo("Target", "Text2", text2)
-            };
-
-            comparisonResults = await _textComparer.CompareAsync(inputTexts);
-
-            // Calcola statistiche
-            var text1Length = text1.Length;
-            var text1Words = text1.Split(new[] { ' ', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length;
-            var text2Length = text2.Length;
-            var text2Words = text2.Split(new[] { ' ', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length;
-
-            myTextModels = new List<MyInputText>
-            {
-                new MyInputText
-                {
-                    InputMode = !string.IsNullOrWhiteSpace(FileContent1) ? "File" : "Text",
-                    FileName = !string.IsNullOrWhiteSpace(FileContent1) ? "File1" : "Input manuale",
-                    Text = text1,
-                    NrOfCharacters = text1Length,
-                    NrOfWords = text1Words
-                },
-                new MyInputText
-                {
-                    InputMode = !string.IsNullOrWhiteSpace(FileContent2) ? "File" : "Text",
-                    FileName = !string.IsNullOrWhiteSpace(FileContent2) ? "File2" : "Input manuale",
-                    Text = text2,
-                    NrOfCharacters = text2Length,
-                    NrOfWords = text2Words
-                }
-            };
-
-            // Calcola il numero totale di match unici
-            uniqueMatchesCount = comparisonResults.Count;
-
-            alertMessage = "Confronto completato.";
-            alertType = "info";
+                inlineText1 = $"<pre>{System.Net.WebUtility.HtmlEncode(text1)}</pre>";
+                inlineText2 = $"<pre>{System.Net.WebUtility.HtmlEncode(text2)}</pre>";
+                alertMessage = "Nessuna similarità trovata.";
+                alertType = "info";
+                Console.WriteLine("Nessun match trovato.");
+            }
         }
         catch (Exception ex)
         {
             alertMessage = ex.Message;
             alertType = "danger";
+            Console.WriteLine($"Errore durante il confronto: {ex.Message}");
         }
         finally
         {
             isLoading = false;
             StateHasChanged();
         }
+    }
+
+
+    // Funzione per convertire i match in HTML evidenziato
+    private static string BuildHighlightedText(string fullText, List<List<MatchSegment>> allMatches, int textIndex)
+    {
+        if (string.IsNullOrEmpty(fullText)) return $"<pre>{fullText}</pre>";
+
+        // Estrai tutti i segmenti di match relativi a textIndex
+        var segments = allMatches
+            .SelectMany(pair => pair)
+            .Where(ms => ms.TextIndex == textIndex)
+            .OrderBy(ms => ms.GetTxtBeginPos(MatchingContext.UnifiedTokensStatic))
+            .ToList();
+
+        if (!segments.Any())
+            return $"<pre>{System.Net.WebUtility.HtmlEncode(fullText)}</pre>";
+
+        var sb = new System.Text.StringBuilder();
+        int currentPos = 0;
+
+        // tokens static in MatchingContext
+        var tokens = MatchingContext.UnifiedTokensStatic;
+
+        foreach (var seg in segments)
+        {
+            int segStart = seg.GetTxtBeginPos(tokens);
+            int segEnd = seg.GetTxtEndPos(tokens);
+
+            if (segStart < 0 || segEnd > fullText.Length || segStart >= segEnd)
+                continue;
+
+            if (currentPos < segStart)
+            {
+                var normalChunk = fullText.Substring(currentPos, segStart - currentPos);
+                sb.Append(System.Net.WebUtility.HtmlEncode(normalChunk));
+            }
+
+            // Trova il segmento corrispondente nel testo opposto
+            var correspondingSeg = allMatches
+                .SelectMany(pair => pair)
+                .FirstOrDefault(s => s.TextIndex != textIndex &&
+                                     s.MatchedText.Equals(seg.MatchedText, StringComparison.OrdinalIgnoreCase));
+
+            // Se non troviamo un segmento corrispondente, usiamo il seg stesso
+            if (correspondingSeg == null)
+                correspondingSeg = seg;
+
+            // Creazione del link per l'highlight
+            var matchChunk = fullText.Substring(segStart, segEnd - segStart);
+            var linkHtml = seg.CreateLinkNode(matchChunk, correspondingSeg);
+
+            sb.Append(linkHtml);
+
+            currentPos = segEnd;
+        }
+
+        if (currentPos < fullText.Length)
+        {
+            var tail = fullText.Substring(currentPos);
+            sb.Append(System.Net.WebUtility.HtmlEncode(tail));
+        }
+
+        return sb.ToString();
     }
 }
