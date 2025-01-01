@@ -4,7 +4,7 @@
      @oninput="HandleInput"
      class="@CssClass"
      style="@Style">
-	@((MarkupString)Content)
+	@System.Net.WebUtility.HtmlEncode(Content)
 </div>
 
 @code {
