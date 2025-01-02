@@ -17,6 +17,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimilarityTextComparison.Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimilarityTextComparison.TestConsole", "SimilarityTextComparison.TestConsole\SimilarityTextComparison.TestConsole.csproj", "{21D834DC-30BF-4AFB-958A-C7E215D6C26E}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{5214E67B-D501-457B-9028-7290058A1CDF}"
+	ProjectSection(SolutionItems) = preProject
+		docs\alghoritm.md = docs\alghoritm.md
+		docs\architecture.md = docs\architecture.md
+		docs\frontend.md = docs\frontend.md
+		docs\original-simtexter-overview.md = docs\original-simtexter-overview.md
+		docs\testing.md = docs\testing.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

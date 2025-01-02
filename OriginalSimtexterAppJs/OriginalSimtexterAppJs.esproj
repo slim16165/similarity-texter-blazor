@@ -15,6 +15,7 @@
     <None Remove="app.js" />
     <None Remove="app.min.js" />
     <None Remove="app.min.js.map" />
+    <None Remove="src\js\CombinedOutput.txt" />
     <None Remove="TextCompare.js" />
   </ItemGroup>
 </Project>
