@@ -61,6 +61,12 @@ SimilarityTexterBlazor/
    - I segmenti simili saranno evidenziati nei testi.
    - Esporta o stampa i risultati per analisi successive.
 
+## Documentazione Dettagliata
+- [Architettura](./docs/architecture.md)
+- [Algoritmo](./docs/algorithm.md)
+- [Frontend con Blazor](./docs/frontend.md)
+- [Strategie di Testing](./docs/testing.md)
+
 ## Licenza
 
 Questo progetto è distribuito sotto la licenza [CC BY-NC-SA 4.0](LICENSE), in conformità con:
