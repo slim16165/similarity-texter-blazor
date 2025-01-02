@@ -1,76 +1,143 @@
-﻿# TextComparer Blazor Application
+﻿# Similarity Texter Blazor (alpha release)
 
-Questo progetto è un'applicazione Blazor per il confronto di testi, porting di un'applicazione JavaScript originaria basata su Node.js e interfacce web, utilizzando le potenzialità di Blazor per il frontend. L'applicazione consente di confrontare due testi o file e mostrare le somiglianze tra di essi, fornendo un'interfaccia user-friendly per la gestione e la visualizzazione dei risultati.
+## Descrizione
 
-## Funzionalità principali
+**Similarity Texter Blazor** è un'applicazione web moderna sviluppata con Blazor, progettata per confrontare due testi e identificare segmenti simili. La logica principale del confronto si basa sull'algoritmo "sim_text" sviluppato da **Dick Grune**, riconosciuto per il suo lavoro pionieristico nel rilevamento delle somiglianze testuali.
 
-- **Confronto di testi**: L'applicazione permette di caricare testi o file e confrontarli per trovare somiglianze.
-- **Opzioni di personalizzazione**: Gli utenti possono configurare varie opzioni per il confronto, come ignorare maiuscole/minuscole, numeri, punteggiatura, o sostituire caratteri speciali come gli umlaut.
-- **Visualizzazione dinamica**: I risultati del confronto vengono mostrati in un'interfaccia dinamica con supporto per scrolling e highlighting.
-- **Caricamento e gestione file**: L'applicazione permette di caricare file testuali e gestirli tramite un'interfaccia semplice e intuitiva.
+L'applicazione incorpora inoltre le idee del progetto originale **"similarity texter"** creato da **Sofia Kalaidopoulou**, che ha fornito l'ispirazione per la struttura e le funzionalità di base.
 
-## Struttura del progetto
+## Stato del Progetto
 
-Il progetto è diviso in vari componenti principali. Qui sotto trovi una descrizione dei file più rilevanti e delle loro funzionalità.
+Questa versione è attualmente un'alpha, ancora in fase di sviluppo attivo. Alcune funzionalità potrebbero essere incomplete o soggette a cambiamenti significativi.
 
-### 1. `SimTexter.cs`
-Questo file contiene la logica principale per il confronto tra testi. 
-- Recupera le impostazioni dell'utente dal servizio di storage (`StorageService`).
-- Tokenizza i testi di input e trova le somiglianze.
-- Applica eventuali stili e visualizza i risultati.
-  
-**Metodi principali**:
-- `CompareAsync`: esegue il confronto tra i testi.
-- `_tokenizeInput`: divide il testo in token per effettuare il confronto.
-- `_getSimilarities`: trova le somiglianze tra i testi e gestisce i risultati.
+## Caratteristiche Principali
 
-### 2. `MyInputText.cs`
-Questo file gestisce l'input dell'utente, che può essere un testo o un file. 
-- Permette di caricare file o inserire testo direttamente tramite l'interfaccia.
-- Converte l'input testuale in una struttura che può essere confrontata da `SimTexter`.
+- **Confronto Testuale Avanzato**: Identifica segmenti simili utilizzando l'algoritmo "sim_text".
+- **Interfaccia Utente Intuitiva**: Sviluppata con Blazor per garantire un'esperienza utente fluida e moderna.
+- **Opzioni Configurabili**: Personalizza il confronto ignorando maiuscole/minuscole, numeri, punteggiatura e sostituendo gli umlaut.
+- **Ampia Gamma di Input**: Supporto per caricamento file .txt e inserimento manuale di testo.
+- **Risultati Visivi**: Segmenti simili evidenziati direttamente nei testi caricati.
+- **Esportazione e Stampa**: Possibilità di generare riepiloghi e stampare i risultati del confronto.
 
-**Metodi principali**:
-- `SetFileInput`: gestisce il caricamento di un file di input.
-- `SetTextInput`: gestisce l'inserimento diretto di testo.
+## Tecnologie Utilizzate
 
-### 3. `View.cs`
-Gestisce la visualizzazione dei risultati e l'interfaccia utente.
-- Mostra gli alert, aggiorna il pannello dei risultati, e permette l'interazione tra i componenti.
-- Simula eventi come `resize` o `compare`.
+- **Blazor**: Framework per la creazione di interfacce utente interattive.
+- **.NET 6+**: Piattaforma di sviluppo per applicazioni web robuste.
+- **Moq & xUnit**: Strumenti di testing per garantire qualità e affidabilità del codice.
 
-**Metodi principali**:
-- `ShowAlertMessage`: mostra i messaggi di avviso nell'interfaccia.
-- `ShowSimilarities`: visualizza le somiglianze trovate tra i testi.
-- `ToggleCompareBtn`: abilita o disabilita il pulsante di confronto.
+## Struttura del Progetto
 
-### 4. Componenti Razor
-
-I componenti `.razor` rappresentano i vari elementi interattivi dell'interfaccia utente, tra cui caricamento dei file, visualizzazione dei risultati, gestione delle impostazioni e altro.
-
-- **`AlertMessage.razor`**: Gestisce i messaggi di avviso che appaiono nella UI.
-- **`ComparisonResult.razor`**: Mostra i risultati del confronto, con i testi confrontati evidenziati.
-- **`FileUploader.razor`**: Permette il caricamento di file da confrontare.
-- **`Loader.razor`**: Visualizza un'animazione durante il caricamento.
-- **`OutputTitle.razor`**: Mostra i titoli dei file di input/output.
-- **`PrintDialog.razor` e `PrintSummary.razor`**: Gestiscono la funzionalità di stampa dei risultati del confronto.
-- **`Settings.razor`**: Permette di configurare le impostazioni di confronto (es. ignorare punteggiatura, numeri, ecc.).
-- **`Statistics.razor`**: Visualizza statistiche sul confronto, come il numero di parole o caratteri nei testi.
-
-### 5. `StorageService.cs`
-Gestisce lo storage locale delle impostazioni utilizzando JavaScript Interop in Blazor per interagire con il `localStorage`.
-
-**Metodi principali**:
-- `GetItemValueByKeyAsync`: recupera un valore specifico dallo storage locale.
-- `SetItemValueById`: imposta il valore di una specifica impostazione.
-
-## Requisiti
-
-- .NET 6.0 SDK
-- Blazor WebAssembly
+- **Application**: Logica principale dell'applicazione.
+  - `TextComparer.cs`: Gestisce il confronto testuale.
+  - `MatchingPipeline.cs`: Pipeline per il rilevamento delle somiglianze.
+- **Domain**: Modelli e interfacce principali.
+  - `MatchSegment.cs`: Rappresenta i segmenti simili trovati.
+  - `ForwardReferenceManager.cs`: Gestione dei riferimenti avanti nell'algoritmo.
+- **Infrastructure**: Implementazioni concrete dei servizi richiesti.
+  - `TextComparisonConfiguration.cs`: Configurazione delle opzioni di confronto.
+  - `StorageService.cs`: Gestione dello storage locale.
+- **Blazor**: Componenti dell'interfaccia utente.
+  - `ComparisonDashboard.razor`: Visualizzazione dei risultati del confronto.
+  - `Settings.razor`: Configurazione delle opzioni dell'applicazione.
 
 ## Installazione
 
-1. Clona il repository:
+### Prerequisiti
+
+- **.NET 6 SDK o superiore**: [Scarica .NET](https://dotnet.microsoft.com/download)
+- **Visual Studio 2022 o Visual Studio Code**: IDE consigliati per lo sviluppo.
+
+### Passaggi
+
+1. **Clona il Repository**
 
    ```bash
-   git clone https://github.com/tuo-repository-url.git
+   git clone https://github.com/tuo-username/similarity-texter-blazor.git
+   cd similarity-texter-blazor
+   ```
+
+2. **Ripristina i Pacchetti NuGet**
+
+   ```bash
+   dotnet restore
+   ```
+
+3. **Compila il Progetto**
+
+   ```bash
+   dotnet build
+   ```
+
+4. **Esegui l'Applicazione**
+
+   ```bash
+   dotnet run --project SimilarityTextComparison.Blazor
+   ```
+
+5. **Accedi all'Applicazione**
+
+   Apri il tuo browser e naviga all'indirizzo [https://localhost:5001](https://localhost:5001).
+
+## Utilizzo
+
+1. **Carica o Inserisci i Testi**
+   - Carica file di testo tramite il pannello di upload.
+   - Oppure inserisci manualmente il testo nei campi dedicati.
+
+2. **Configura le Impostazioni**
+   - Personalizza le opzioni di confronto tramite il pannello "Impostazioni".
+
+3. **Esegui il Confronto**
+   - Premi "Confronta" per avviare l'elaborazione.
+
+4. **Visualizza i Risultati**
+   - I segmenti simili saranno evidenziati nei testi confrontati.
+   - Esporta o stampa i risultati per analisi successive.
+
+## Contribuire
+
+Siamo aperti ai contributi! Segui questi passaggi per partecipare al progetto:
+
+1. **Fork del Repository**
+2. **Crea un Branch per le Tue Modifiche**
+
+   ```bash
+   git checkout -b feature/nome-feature
+   ```
+
+3. **Effettua le Modifiche e Commit**
+
+   ```bash
+   git commit -m "Descrizione delle modifiche"
+   ```
+
+4. **Pusha il Branch**
+
+   ```bash
+   git push origin feature/nome-feature
+   ```
+
+5. **Crea una Pull Request**
+
+## Licenza
+
+Questo progetto è distribuito sotto la licenza [MIT](LICENSE). Questa licenza è compatibile con le opere di **Dick Grune** e **Sofia Kalaidopoulou**, i cui contributi sono riconosciuti esplicitamente nel presente README.
+
+## Riconoscimenti
+
+- **Dick Grune**: Autore dell'algoritmo "sim_text". Per ulteriori informazioni, visita il suo [sito web](https://dickgrune.com/Programs/similarity_text/).
+- **Sofia Kalaidopoulou**: Creatrice del progetto originale "similarity texter". Puoi visitare il suo [profilo LinkedIn](https://linkedin.com/in/sofia-kalaidopoulou).
+
+Entrambi i loro contributi sono stati fondamentali per lo sviluppo di questa applicazione.
+
+## Suggerimenti per Miglioramenti Futuri
+
+- **Screenshot e Demo Video**: Aggiungi elementi visivi per migliorare la comprensione del progetto.
+- **Sezione FAQ**: Risposte a domande comuni degli utenti.
+- **Dettagli sulle Dipendenze**: Lista dettagliata delle dipendenze del progetto.
+- **Documentazione Avanzata**: Guide per sviluppatori e amministratori di sistema.
+
+## Supporto
+
+Hai bisogno di aiuto o hai un suggerimento? Non esitare a creare un'issue su GitHub o a contattarmi tramite [LinkedIn](https://www.linkedin.com/in/gianluigisalvi/) o [GitHub](https://github.com/slim16165/similarity-texter-blazor).
+
