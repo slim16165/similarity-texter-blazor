@@ -130,12 +130,27 @@ Questo progetto è distribuito sotto la licenza [MIT](LICENSE). Questa licenza �
 
 Entrambi i loro contributi sono stati fondamentali per lo sviluppo di questa applicazione.
 
+### Dick Grune
+Dick Grune è un informatico olandese noto per aver sviluppato l'algoritmo sim_text, un programma di confronto di testi utilizzato principalmente per la rilevazione di plagio. Questo algoritmo è stato creato nel 1989 presso la Vrije Universiteit di Amsterdam e si distingue per la sua efficienza nell'analizzare documenti per sezioni duplicate e nel confrontare testi in vari linguaggi di programmazione, tra cui C, C++, Java e Pascal[1][2].
+
+Il suo software sim_text è composto da diversi programmi che analizzano la similarità lessicale nei testi naturali e nei codici sorgente, presentando i risultati in formati facilmente interpretabili. Questo strumento è stato applicato in vari contesti, dalla rilevazione di plagio alla comparazione di testi storici[2][9].
+
+### Sofia Kalaidopoulou
+Sofia Kalaidopoulou è una ricercatrice associata all'Università di Utrecht, dove si occupa di spettrometria di massa biomolecolare e proteomica. Ha realizzato il progetto Similarity Texter, una web app basata sull'algoritmo sim_text di Grune, nel contesto della sua tesi di laurea. Questo strumento è progettato per rilevare somiglianze lessicali tra testi e per evidenziare le sottostringhe comuni più lunghe tra due input[1][4][8].
+
+Nella sua tesi, Kalaidopoulou discute l'importanza del confronto dei testi in vari ambiti della scienza informatica, come il recupero delle informazioni e la traduzione automatica. Il suo lavoro ha contribuito a rendere l'algoritmo sim_text accessibile attraverso un'interfaccia web, facilitando l'uso da parte di un pubblico più ampio[1][6].
+
+### Citazione lavori
+
+Dick Grune: Grune, D. (1989). sim_text: A text similarity tester. Vrije Universiteit Amsterdam. Disponibile su dickgrune.com.
+
+Sofia Kalaidopoulou: Kalaidopoulou, S. (2016). Similarity Texter: A text-comparison web tool based on the sim_text algorithm. Tesi di laurea, HTW Berlin. Disponibile su htw-berlin.de.
+
 ## Suggerimenti per Miglioramenti Futuri
 
 - **Screenshot e Demo Video**: Aggiungi elementi visivi per migliorare la comprensione del progetto.
 - **Sezione FAQ**: Risposte a domande comuni degli utenti.
 - **Dettagli sulle Dipendenze**: Lista dettagliata delle dipendenze del progetto.
-- **Documentazione Avanzata**: Guide per sviluppatori e amministratori di sistema.
 
 ## Supporto
 
